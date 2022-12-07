@@ -1,0 +1,104 @@
+
+
+.loader {
+  --sz: 7rem;
+  width: calc(var(--sz) * 2);
+  display: -webkit-box;
+  display: flex;
+  -webkit-box-pack: space-evenly;
+          justify-content: space-evenly;
+}
+
+.loader__sq {
+  --p-sz: calc(var(--sz) / 4);
+  --m-offset: calc((var(--p-sz) * -1) * 0.75);
+  position: relative;
+  display: -webkit-box;
+  display: flex;
+  -webkit-box-align: end;
+          align-items: flex-end;
+  -webkit-box-pack: space-evenly;
+          justify-content: space-evenly;
+  height: 100%;
+  width: 50%;
+}
+.loader__sq::before, .loader__sq::after {
+  width: var(--p-sz);
+  height: var(--p-sz);
+  content: "";
+  position: relative;
+  -webkit-transform: translateY(calc((var(--sz) - var(--p-sz)) * -1));
+          transform: translateY(calc((var(--sz) - var(--p-sz)) * -1));
+  animation: loader-box-bounce 0.5s cubic-bezier(0.3, 0.5, 0.4, 0.95) calc(var(--i) * 0.06s) infinite alternate-reverse;
+}
+.loader__sq:first-of-type {
+  margin-right: var(--m-offset);
+}
+.loader__sq:first-of-type::before {
+  --i: 1;
+  border: 3px solid #ff7ab5;
+  border-radius: 50%;
+}
+.loader__sq:first-of-type::after {
+  --i: 3;
+  background-color: #c643fb;
+}
+@supports ((-webkit-clip-path: circle()) or (clip-path: circle())) {
+  .loader__sq:first-of-type::after {
+    -webkit-clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+            clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+  }
+}
+.loader__sq:nth-of-type(2)::before {
+  --i: 2;
+  border: 3px solid #ffb650;
+}
+.loader__sq:nth-of-type(2)::after {
+  --i: 4;
+  background-color: #2fe2dd;
+  border-radius: 50%;
+}
+@supports ((-webkit-clip-path: circle()) or (clip-path: circle())) {
+  .loader__sq:nth-of-type(2)::after {
+    border-radius: 0;
+    -webkit-clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  }
+}
+
+@-webkit-keyframes loader-box-bounce {
+  to {
+    -webkit-transform: translateY(0);
+            transform: translateY(0);
+  }
+}
+
+@keyframes loader-box-bounce {
+  to {
+    -webkit-transform: translateY(0);
+            transform: translateY(0);
+  }
+}
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.loader_text{
+  
+  width:100%;
+  padding-top: 20px;
+  font-size:25px;
+  background: linear-gradient(to right, #d7e4e4 0%, #08671c 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: bolder;
+}
