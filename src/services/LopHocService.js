@@ -13,8 +13,13 @@ const capNhatLopHocService = (model) => {
     return BaseApi.put(`${API_URL}/${model.id}`, model);
 }
 
+const layBaiTapDaCham = () =>{
+    return BaseApi.get(`/api/buoihoc/get-bai-tap-chua-cham`);
+  }
+
 export const LopHocService = {
     layDanhSachLopService,
     layDanhSachChiNhanhService,
-    capNhatLopHocService
+    capNhatLopHocService,
+    layBaiTapDaCham
 }

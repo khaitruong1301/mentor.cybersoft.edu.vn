@@ -4,7 +4,8 @@ import { LopHocService } from '../../services/LopHocService';
 
 const initialState = {
   danhSachLop: [],
-  dsChiNhanh: []
+  dsChiNhanh: [],
+  dsBaiTapDaCham:null
 };
 
 const lopHocReducer = createSlice({
@@ -19,13 +20,18 @@ const lopHocReducer = createSlice({
       state.dsChiNhanh = payload;
 
     },
+    getBaiTapDaCham: (state, { type, payload }) => {
+      state.dsBaiTapDaCham = payload;
+
+    },
   }
 });
 
 //quản lý actions
 export const {
   getDanhSachLop,
-  getDanhSachChiNhanh
+  getDanhSachChiNhanh,
+  getBaiTapDaCham
 } = lopHocReducer.actions
 
 export default lopHocReducer.reducer
@@ -48,4 +54,10 @@ export const callApiChiNhanh = () => async (dispatch) => {
   const apiChiNhanh = await LopHocService.layDanhSachChiNhanhService();
 
   dispatch(getDanhSachChiNhanh(apiChiNhanh.data.content));
+}
+
+export const callApiBaiTapDaCham= () => async (dispatch) => {
+  const apiBaiTapDaCham = await LopHocService.layBaiTapDaCham();
+
+  dispatch(getBaiTapDaCham(apiBaiTapDaCham.data.content));
 }

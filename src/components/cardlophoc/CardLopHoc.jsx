@@ -19,7 +19,7 @@ export const CardLopHoc = (props) => {
 
     let { danhSachLop, dsChiNhanh, dsNguoiDung, dsMentor } = props;
 
-    return (<div className='row overflow-auto bg-secondary' style={{ height: 500 }}>
+    return (<div className='row overflow-auto bg-secondary' style={{ height: "100vh" }}>
         {danhSachLop.map(lopHoc => {
 
             let chiNhanh = dsChiNhanh.find(n => n.id == lopHoc.chiNhanh);

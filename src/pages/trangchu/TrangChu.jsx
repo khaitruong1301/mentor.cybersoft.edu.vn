@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { callApiQuyen } from '../../redux/reducers/adminReducer';
-import { callApiChiNhanh, callApiLopHoc } from '../../redux/reducers/lopHocReducer';
+import { callApiBaiTapDaCham, callApiChiNhanh, callApiLopHoc } from '../../redux/reducers/lopHocReducer';
 import { USER_LOGIN } from '../../utils/constant';
 import { history } from '../../utils/history';
 
@@ -12,6 +12,9 @@ export default function TrangChu(props) {
 
   const dispatch = useDispatch();
   const dsQuyen = useSelector(state => state.adminReducer.dsQuyen);
+
+  const dsBaiTapDaCham = useSelector(state => state.lopHocReducer.dsBaiTapDaCham);
+
 
   useEffect(() => {
 
@@ -29,6 +32,10 @@ export default function TrangChu(props) {
 
     //call chi nhanh
     dispatch(callApiChiNhanh());
+
+    //call bai tap da cham
+    if (dsBaiTapDaCham == null)
+      dispatch(callApiBaiTapDaCham());
 
   }, [])
 

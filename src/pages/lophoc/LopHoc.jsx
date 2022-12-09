@@ -8,6 +8,8 @@ import { dinhDangNgayCheck, dinhDangThangCheck } from '../../utils/DateFormat';
 import { useSearchParams } from 'react-router-dom';
 import { lichHocOptions } from '../../utils/SelectOption';
 import moment from 'moment';
+import { ListChuaCham } from '../../utils/ListChuaCham';
+import { MentorChuaCham } from '../../components/cardmentor/MentorChuaCham';
 
 const { Option } = Select;
 const { RangePicker, MonthPicker } = DatePicker;
@@ -15,6 +17,7 @@ const { Search } = Input;
 
 export default function LopHoc(props) {
     const dispatch = useDispatch();
+    const [chuaCham, setChuaCham] = useState(false);
 
     let [searchParams, setSearchParams] = useSearchParams({
         cn: 0,
@@ -22,7 +25,7 @@ export default function LopHoc(props) {
         kg: null,
         time: null,
         tmt: "",
-        emp: 0
+        emp: 1
     });
 
     useEffect(() => {
@@ -34,8 +37,6 @@ export default function LopHoc(props) {
     const dsChiNhanh = useSelector(state => state.lopHocReducer.dsChiNhanh);
     const dsNguoiDung = useSelector(state => state.userReducer.dsNguoiDung);
     const dsKhachHang = useSelector(state => state.userReducer.dsKhachHang);
-
-
 
 
     //order mentor
@@ -173,14 +174,24 @@ export default function LopHoc(props) {
     return (
         <div className='mx-5 row'>
             <Divider orientation="left">Danh sách mentor</Divider>
+
             <div className='col-3'>
-                <Search placeholder="Tên mentor" onSearch={(value) => handleSearch(value, "tmt")} enterButton />
+                {!chuaCham && <>
+
+                    <Search placeholder="Tên mentor" onSearch={(value) => handleSearch(value, "tmt")} enterButton />
+                    <p></p>
+                    <b>Còn trống:</b> <Switch checked={mentorTrong} onChange={(value) => handleSearch(value, "emp")} />
+                </>}
                 <p></p>
-                <b>Còn trống:</b> <Switch checked={mentorTrong} onChange={(value) => handleSearch(value, "emp")} />
+                <b>Chưa chấm bài:</b> <Switch onChange={(value) => setChuaCham(value)} />
             </div>
             <div className='col-9'>
 
-                <CardMentor mentorTrong={mentorTrong} dsLop={dsLop} dsMentor={dsMentor} dsKhachHang={dsKhachHang} />
+                {!chuaCham ?
+                    <CardMentor mentorTrong={mentorTrong} dsLop={dsLop} dsMentor={dsMentor} dsKhachHang={dsKhachHang} />
+                    :
+                    <MentorChuaCham dsKhachHang={dsKhachHang} dsMentorCreate={dsMentorCreate} />
+                }
             </div>
 
             <Divider orientation="left">Danh sách lớp học đang & sắp mở</Divider>
