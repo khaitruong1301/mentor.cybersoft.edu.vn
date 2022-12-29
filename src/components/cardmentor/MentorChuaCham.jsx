@@ -8,7 +8,8 @@ export const MentorChuaCham = (props) => {
     let { dsMentorCreate, dsKhachHang } = props;
 
     const dsBaiTapDaCham = useSelector(state => state.lopHocReducer.dsBaiTapDaCham);
-
+   
+    
     let listChuaCham = ListChuaCham(dsBaiTapDaCham);
 
     let listMentor = null;
@@ -47,7 +48,7 @@ export const MentorChuaCham = (props) => {
 
                             listMentor.push({
                                 id: nguoiDung ? nguoiDung.id : itemMentor.mentorId,
-                                hoTen: nguoiDung ? nguoiDung.hoTen : itemMentor.mentorId +" (xóa quyền)",
+                                hoTen: nguoiDung ? nguoiDung.hoTen : itemMentor.mentorId + " (xóa quyền)",
                                 linkFacebook: khachHang[0] ? khachHang[0].linkFacebook : null,
                                 listChuaCham: [{ tieuDe: itemBaiTap.TieuDe, chuaCham: itemBaiTap.chuaCham, tenLopHoc: item.tenLopHoc, }]
                             })
@@ -68,7 +69,7 @@ export const MentorChuaCham = (props) => {
             <div className='row overflow-auto bg-light' style={{ height: "100vh" }}>
                 {listMentor.length > 0 ? listMentor.map(item => {
 
-                    return <div class="col-sm-3 ">
+                    return <div class="col-lg-6  col-xl-3 ">
                         <div class="card mt-2 ">
                             <div class="card-header font-weight-bold">
                                 {<>
@@ -80,7 +81,7 @@ export const MentorChuaCham = (props) => {
                                 {
                                     item.listChuaCham.map(itemChuaCham => {
                                         return <>
-                                            <Tag color='red' >
+                                            <Tag color='red'  >
                                                 {itemChuaCham.tieuDe} <br />
                                                 {itemChuaCham.tenLopHoc} <br />
                                                 Tổng chưa chấm: {itemChuaCham.chuaCham}

@@ -188,9 +188,9 @@ export default function LopHoc(props) {
             <div className='col-9'>
 
                 {!chuaCham ?
-                    <CardMentor mentorTrong={mentorTrong} dsLop={dsLop} dsMentor={dsMentor} dsKhachHang={dsKhachHang} />
+                    <CardMentor mentorTrong={mentorTrong} dsLop={dsLop} dsMentor={dsMentor} dsKhachHang={dsKhachHang} dsNguoiDung={dsNguoiDung} danhSachLop={danhSachLop} />
                     :
-                    <MentorChuaCham dsKhachHang={dsKhachHang} dsMentorCreate={dsMentorCreate} />
+                    <MentorChuaCham dsKhachHang={dsKhachHang} dsMentorCreate={dsMentorCreate}  dsNguoiDung={dsNguoiDung}/>
                 }
             </div>
 

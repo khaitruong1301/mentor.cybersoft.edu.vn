@@ -10,7 +10,7 @@ export const ListChuaCham = (dsBaiTapDaCham) => {
 
         dsBaiTapDaCham.map(itemDaCham => {
             let ngayHeThong = new Date(itemDaCham.ngayHeThong);
-          
+
             const { danhSachBuoiHocNew } = itemDaCham.lopHoc;
             const danhSachBuoiHoc = danhSachBuoiHocNew.length > 0 && danhSachBuoiHocNew != "" ? JSON.parse(danhSachBuoiHocNew) : [];
 
@@ -74,5 +74,43 @@ export const ListChuaCham = (dsBaiTapDaCham) => {
                 })
         });
     return danhSachBaiTapChuaCham;
+
+}
+
+
+export const ListXepHangDanhGia = (danhSachDanhGia) => {
+
+    let listDanhGia = [];
+
+    danhSachDanhGia.map(item => {
+        let { mentorId, noiDung } = item;
+        let checkDanhGia = listDanhGia.find(n => n.mentorId == mentorId);
+        let diemDanhGia = item && noiDung ? JSON.parse(noiDung) : [];
+
+        let congDiem = 0;
+        //check diem 4 va 5 thi moi cong
+        diemDanhGia.map(itemDiem => congDiem += itemDiem > 3 ? itemDiem : 0);
+
+        if (checkDanhGia) {
+            checkDanhGia.soLuong += 1;
+            checkDanhGia.tongDiem += congDiem;
+        }
+        else {
+
+            listDanhGia.push({
+                mentorId,
+                soLuong: 1,
+                tongDiem: congDiem
+            })
+        }
+    })
+
+    listDanhGia.sort((a, b) => b.tongDiem - a.tongDiem);
+
+    listDanhGia[0] = {...listDanhGia[0],top:1};
+    listDanhGia[1] = {...listDanhGia[1],top:2};
+    listDanhGia[2] = {...listDanhGia[2],top:3};
+
+    return listDanhGia;
 
 }

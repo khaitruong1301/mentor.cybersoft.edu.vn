@@ -6,6 +6,7 @@ import { USER_LOGIN } from '../../utils/constant';
 import { history } from '../../utils/history';
 
 import { callApiKhachHang, callApiNguoiDung } from '../../redux/reducers/userReducer';
+import { callApiDanhSachDanhGia, callApiMucDanhGia } from '../../redux/reducers/danhGiaMentorReducer';
 
 
 export default function TrangChu(props) {
@@ -37,6 +38,11 @@ export default function TrangChu(props) {
     if (dsBaiTapDaCham == null)
       dispatch(callApiBaiTapDaCham());
 
+    //call lay danh muc danh gia
+    dispatch(callApiMucDanhGia());
+
+    //call lay danh sach danh gia mentor
+    dispatch(callApiDanhSachDanhGia());
   }, [])
 
   let pathName = localStorage.getItem("url_redirect");

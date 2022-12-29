@@ -10,7 +10,16 @@ const layNhomQuyenService = () =>{
     return BaseApi.get(`/api/NhomQuyen`);
 }
 
+const layDanhMucDanhGiaService = () =>{
+    return BaseApi.get(`/api/danhgiamentor/lay-muc-danh-gia`);
+}
+const layDanhSachDanhGiaService = () =>{
+    return BaseApi.get(`/api/danhgiamentor`);
+}
+
 export const AdminService = {
     layQuyenUserService,
-    layNhomQuyenService
+    layNhomQuyenService,
+    layDanhMucDanhGiaService,
+    layDanhSachDanhGiaService
 }
