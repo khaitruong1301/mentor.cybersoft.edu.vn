@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Tag, Rate } from 'antd';
+import { Table, Tag, Rate, Tooltip } from 'antd';
 import { useSelector } from 'react-redux';
 
 export const ChiTietDanhGia = (props) => {
@@ -28,7 +28,16 @@ export const ChiTietDanhGia = (props) => {
                         </p>
                         <b> Điểm tốt:{noiDung.filter(n => n >= 3).length}</b>
                         <br />
-                        <b> Điểm xấu:{noiDung.filter(n => n < 3).length}</b>
+                        <b> Điểm xấu:{noiDung.filter(n => n > 0 && n < 3).length}</b>
+                        <br />
+                        <b> Chưa có:{noiDung.filter(n => n == 0).length}</b>
+                        <br />
+                        {noiDung[0] && noiDung[0] != 0 && noiDung[0] != "" ?
+                            <Tooltip title={noiDung[0]}  trigger="click" color='green'>
+                                <button className='btn btn-primary btn-sm'>Nhận xét</button>
+                            </Tooltip>
+                            : ""
+                        }
                     </span>
             },
         },
@@ -38,7 +47,7 @@ export const ChiTietDanhGia = (props) => {
             key: 'thongtin',
             render: (_, record) => {
                 let noiDung = record.noiDung ? JSON.parse(record.noiDung) : [];
-                let index = -1;
+                let index = 0;
 
                 return <table>
                     {danhMucDanhGia.map(item => {
