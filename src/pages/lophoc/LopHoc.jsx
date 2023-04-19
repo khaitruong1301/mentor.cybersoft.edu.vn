@@ -19,37 +19,6 @@ const { Search } = Input;
 export default function LopHoc(props) {
   const dispatch = useDispatch();
   const [chuaCham, setChuaCham] = useState(false);
-  const { token } = useParams();
-  const getQuyenUserVaCheck = async (tokenLocal) => {
-    const res = await axios({
-      method: "GET",
-      url: "https://apicrm.cybersoft.edu.vn/api/quyen/lay-quyen-user",
-      headers: {
-        Authorization: `Bearer ${tokenLocal}`,
-      },
-    });
-    const checkQuyen = checkQuyenUser(res.data.content, "XL_MT");
-    if (!checkQuyen) {
-      // alert("Bạn không có quyền xem lớp học này");
-      window.location = "https://www.google.com/";
-    }
-  };
-  useEffect(() => {
-    // check local xem có token chưa
-    // 4 case : có local mà không có url, có local và có url, có url không có local, không có cả 2
-    const tokenLocal = localStorage.getItem("USER_TOKEN");
-    if (!tokenLocal && token) {
-      localStorage.setItem("USER_TOKEN", token);
-      getQuyenUserVaCheck(tokenLocal);
-    } else if (!tokenLocal && !token) {
-      window.location = "https://www.google.com/";
-    } else if (tokenLocal && !token) {
-      getQuyenUserVaCheck(tokenLocal);
-    } else if (tokenLocal && token) {
-      localStorage.setItem("USER_TOKEN", token);
-      getQuyenUserVaCheck(token || tokenLocal);
-    }
-  }, [token]);
 
   useEffect(() => {}, []);
 
