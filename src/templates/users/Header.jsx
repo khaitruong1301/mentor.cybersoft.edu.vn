@@ -23,7 +23,12 @@ export default function Header() {
             } to="/lophoc">Lớp học </NavLink>
 
           </li>
+          <li className="nav-item ">
+            <NavLink className={({ isActive}) =>
+              "nav-link text-white " + (isActive && "bg-info")
+            } to="/danh-gia-mentor">Danh Gia Mentor </NavLink>
 
+          </li>
       
 
           {/* <li className="nav-item dropdown">

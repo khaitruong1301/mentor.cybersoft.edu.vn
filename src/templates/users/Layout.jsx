@@ -18,6 +18,7 @@ export default function Layout() {
           Authorization: `Bearer ${tokenLocal}`,
         },
       });
+      console.log(res)
       const checkQuyen = checkQuyenUser(res.data.content, "XL_MT");
       if (!checkQuyen) {
         // alert("Bạn không có quyền xem lớp học này");
@@ -37,7 +38,7 @@ export default function Layout() {
       localStorage.setItem("USER_TOKEN", token);
       getQuyenUserVaCheck(tokenLocal);
     } else if (!tokenLocal && !token) {
-      window.location = "https://www.google.com/";
+      // window.location = "https://www.google.com/";
     } else if (tokenLocal && !token) {
       getQuyenUserVaCheck(tokenLocal);
     } else if (tokenLocal && token) {
