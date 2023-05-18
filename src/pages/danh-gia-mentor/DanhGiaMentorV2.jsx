@@ -15,6 +15,7 @@ import {
   Tooltip,
   Rate,
   Badge,
+  Switch,
 } from "antd";
 import { useSearchParams } from "react-router-dom";
 import moment from "moment";
@@ -31,14 +32,14 @@ const initialState = {
   isLoading: false,
   data: [],
   isModalChiTietDanhGiaVisible: false,
-  recordDangChon: {}
+  recordDangChon: {},
 };
 
 const CONSTANTS = {
   SET_IS_LOADING: "SET_IS_LOADING",
   SET_DATA: "SET_DATA",
   SET_MODAL_CHI_TIET_DANH_GIA_VISIBLE: "SET_MODAL_CHI_TIET_DANH_GIA_VISIBLE",
-  SET_RECORD_XEM_CHI_TIET_DANH_GIA: "SET_RECORD_XEM_CHI_TIET_DANH_GIA"
+  SET_RECORD_XEM_CHI_TIET_DANH_GIA: "SET_RECORD_XEM_CHI_TIET_DANH_GIA",
 };
 
 function asyncThing(value) {
@@ -60,17 +61,17 @@ export default function DanhGiaMentorV2() {
           ...state,
           data: payload,
         };
-        case CONSTANTS.SET_MODAL_CHI_TIET_DANH_GIA_VISIBLE:
+      case CONSTANTS.SET_MODAL_CHI_TIET_DANH_GIA_VISIBLE:
         return {
           ...state,
           isModalChiTietDanhGiaVisible: payload,
         };
-        case CONSTANTS.SET_RECORD_XEM_CHI_TIET_DANH_GIA:
-          return {
-            ...state,
-            isModalChiTietDanhGiaVisible: true,
-            recordDangChon: payload,
-          };
+      case CONSTANTS.SET_RECORD_XEM_CHI_TIET_DANH_GIA:
+        return {
+          ...state,
+          isModalChiTietDanhGiaVisible: true,
+          recordDangChon: payload,
+        };
       default:
         return state;
     }
@@ -91,16 +92,17 @@ export default function DanhGiaMentorV2() {
     (state) => state.danhGiaMentorReducer.danhSachMentorChuaChamBai
   );
 
-
   let [searchParams, setSearchParams] = useSearchParams({
     type_search: "tenLop",
     value_search: "",
     theo_day: "null",
     theo_month: "null",
-    nx: "0",
+    nx: 0,
     tieuChi: "[0,1,2,3,4,5]",
     diemTu: "-1",
-    diemDen: "-1"
+    diemDen: "-1",
+    loai_gv: 0,
+    cb: 0
   });
 
   //get range date value
@@ -116,8 +118,11 @@ export default function DanhGiaMentorV2() {
   if (searchParams.get("tieuChi") != "null") {
     tieuChi = JSON.parse(searchParams.get("tieuChi"));
   }
-  let diemTu = Number(searchParams.get("diemTu"))
-  let diemDen = Number(searchParams.get("diemDen"))
+  let diemTu = Number(searchParams.get("diemTu"));
+  let diemDen = Number(searchParams.get("diemDen"));
+  let isCoNhanXet = +searchParams.get("nx");
+  let loaiNguoiDung = +searchParams.get("loai_gv")
+  let isChuaChamBai = +searchParams.get("cb")
 
   function tinhDiemDuaTheoTieuChi(dataDiem, tieuChiArray) {
     let count = 0;
@@ -225,8 +230,6 @@ export default function DanhGiaMentorV2() {
     });
   }
 
-  
-
   useEffect(() => {
     let isMount = true;
     if (isMount && danhSachDanhGiaCrm?.length > 0) {
@@ -246,6 +249,14 @@ export default function DanhGiaMentorV2() {
     });
   }
 
+  async function locTheoLoaiNguoiDung(data, loaiNguoiDung) {
+    let  loaiNguoiDungCanCheck = loaiNguoiDung === 1 ? "GIANGVIEN" : "MENTOR"
+    const arrTemp = await Promise.all(await asyncThing(data));
+    return arrTemp.filter((item) => {
+      return item.MaNhomQuyen === loaiNguoiDungCanCheck;
+    });
+  }
+
   async function locTheoKhoangThoiGian(data, rangeValue) {
     const arrTemp = await Promise.all(await asyncThing(data));
     return arrTemp.filter((item) => {
@@ -253,6 +264,27 @@ export default function DanhGiaMentorV2() {
         moment(rangeValue[0]),
         moment(rangeValue[1])
       );
+    });
+  }
+
+  async function locChuaChamBai(data, danhSachMentorChuaChamBai) {
+    const arrTemp = await Promise.all(await asyncThing(data));
+    return arrTemp.filter((item) => {
+
+        let isCoTenTrongDanhSach =
+          danhSachMentorChuaChamBai.hasOwnProperty(item.MentorId);
+    
+        let isLopChuaCham = false;
+    
+        if (isCoTenTrongDanhSach) {
+          isLopChuaCham =
+            danhSachMentorChuaChamBai[
+              item.MentorId
+            ].danhSachCacLopQuaHanCham.hasOwnProperty(item.MaLop);
+        }
+    
+        return (isCoTenTrongDanhSach && isLopChuaCham)
+
     });
   }
 
@@ -266,19 +298,24 @@ export default function DanhGiaMentorV2() {
     const arrTemp = await Promise.all(await asyncThing(data));
 
     return arrTemp.filter((item) => {
+      let isKiemTraDiemDanhGia = diemTu !== -1;
 
-      let isKiemTraDiemDanhGia = diemTu !== -1
-      let isDuDieuKien = true
+      let isDuDieuKien = true;
       if (isKiemTraDiemDanhGia) {
-          isDuDieuKien = (JSON.parse(item.NoiDungDanhGia)?.some((item) => item.DiemDanhGia >= diemTu && item.DiemDanhGia <= diemDen))
-          
-          
-          
+        isDuDieuKien = JSON.parse(item.NoiDungDanhGia)?.some(
+          (item) => item.DiemDanhGia >= diemTu && item.DiemDanhGia <= diemDen
+        );
+      }
+
+      if (isCoNhanXet) {
+        isDuDieuKien = JSON.parse(item.NoiDungDanhGia)?.some(
+          (item) => item.NhanXet.trim() !== ""
+        );
       }
 
       switch (type) {
         case "tenLop":
-          return isDuDieuKien && checkString(item.TenLopHoc, inputValue) ;
+          return isDuDieuKien && checkString(item.TenLopHoc, inputValue);
         case "hoTen":
           return isDuDieuKien && checkString(item.HoTen, inputValue);
 
@@ -302,6 +339,13 @@ export default function DanhGiaMentorV2() {
         dataFiltered = danhSachDanhGiaCrm;
       }
 
+      // Kiem tra xem co filter theo loai nguoi dung khong
+      if (loaiNguoiDung > 0) {
+        locTheoLoaiNguoiDung(dataFiltered, loaiNguoiDung).then((res) => {
+          dataFiltered = res
+        })
+      }
+
       // Kiem tra xem co filter theo ngay thang gi khong
       if (searchParams.get("theo_day") !== "null") {
         locTheoKhoangThoiGian(dataFiltered, rangeValue).then((res) => {
@@ -311,6 +355,13 @@ export default function DanhGiaMentorV2() {
 
       if (searchParams.get("theo_month") !== "null") {
         locTheoThang(dataFiltered, theoThang).then((res) => {
+          dataFiltered = res;
+        });
+      }
+
+
+      if (danhSachMentorChuaChamBai && isChuaChamBai) {
+        locChuaChamBai(dataFiltered, danhSachMentorChuaChamBai).then((res) => {
           dataFiltered = res;
         });
       }
@@ -337,7 +388,20 @@ export default function DanhGiaMentorV2() {
     searchParams.set("theo_month", "null");
     searchParams.set("theo_day", "null");
     setSearchParams(searchParams);
-    handleFilterData()
+    handleFilterData();
+  };
+
+  const handleResetFilter = () => {
+    searchParams.set("theo_month", "null");
+    searchParams.set("theo_day", "null");
+    searchParams.set("value_search", "");
+    searchParams.set("diemTu", "-1");
+    searchParams.set("diemDen", "-1");
+    searchParams.set("nx", 0);
+    searchParams.set("loai_gv", 0);
+    searchParams.set("cb", 0);
+    setSearchParams(searchParams);
+    handleFilterData();
   };
 
   //hanlde search class
@@ -356,6 +420,16 @@ export default function DanhGiaMentorV2() {
       case "theo_month": {
         searchParams.set(name, value);
         searchParams.set("theo_day", "null");
+        break;
+      }
+
+      case "nx": {
+        searchParams.set(name, value ? 1 : 0);
+        break;
+      }
+
+      case "cb": {
+        searchParams.set(name, value ? 1 : 0);
         break;
       }
 
@@ -522,7 +596,17 @@ export default function DanhGiaMentorV2() {
           <Tooltip
             title={`Đánh giá Mentor: ${soLuongDanhGiaMentor}, Đánh giá Học Viên: ${soLuongDanhGiaHocVien}, Đánh giá Giảng viên: ${soLuongDanhGiaGiangVien}`}
           >
-            <button className="btn btn-success" onClick={() => dispatchLocal({type: CONSTANTS.SET_RECORD_XEM_CHI_TIET_DANH_GIA, payload: record})}>Xem đánh giá</button>
+            <button
+              className="btn btn-success"
+              onClick={() =>
+                dispatchLocal({
+                  type: CONSTANTS.SET_RECORD_XEM_CHI_TIET_DANH_GIA,
+                  payload: record,
+                })
+              }
+            >
+              Xem đánh giá
+            </button>
           </Tooltip>
         );
       },
@@ -598,31 +682,68 @@ export default function DanhGiaMentorV2() {
               </button>
             </Input.Group>
           </div>
-          <div className="col-md-8">
+          <div className="col-md-2">
+            <Input.Group compact>
+              <button className="btn btn-primary" onClick={handleResetFilter}>
+                Clear Filter
+              </button>
+            </Input.Group>
+          </div>
+          <div className="col-md-3">
+            <Input.Group compact>
+              <Input
+                addonBefore="Điểm đánh giá từ"
+                style={{
+                  width: 185,
+                  textAlign: "center",
+                }}
+                onChange={(e) => handleSearch(e.target.value, "diemTu")}
+                defaultValue={diemTu}
+              />
 
-          <Input.Group compact>
-     
-      <Input
-      addonBefore="Điểm đánh giá từ"
-        style={{
-          width: 185,
-          textAlign: 'center',
-        }}
-        onChange={(e) => handleSearch(e.target.value, "diemTu")}
-        defaultValue={diemTu}
-      />
-     
-      <Input
-      addonBefore="Đến"
-        className="site-input-right"
-        style={{
-          width: 100,
-          textAlign: 'center',
-        }}
-        onChange={(e) => handleSearch(e.target.value, "diemDen")}
-        defaultValue={diemDen}
-      />
-    </Input.Group>
+              <Input
+                addonBefore="Đến"
+                className="site-input-right"
+                style={{
+                  width: 100,
+                  textAlign: "center",
+                }}
+                onChange={(e) => handleSearch(e.target.value, "diemDen")}
+                defaultValue={diemDen}
+              />
+            </Input.Group>
+          </div>
+          <div className="col-md-2">
+            <b>Có nhận xét:</b>{" "}
+            <Switch
+              checked={isCoNhanXet}
+              onChange={(value) => handleSearch(value, "nx")}
+            />
+          </div>
+
+        
+        </div>
+        <div className="row mt-2">
+        <div className="col-md-2">
+            <Input.Group compact>
+              <Select
+                defaultValue={loaiNguoiDung}
+                style={{ width: "40%" }}
+                onSelect={(value) => handleSearch(value, "loai_gv")}
+              >
+                <Option value={0}>Tất cả</Option>
+                <Option value={1}>Giảng viên</Option>
+                <Option value={2}>Mentor</Option>
+
+              </Select>
+            </Input.Group>
+          </div>
+          <div className="col-md-2">
+            <b>Chưa chấm bài:</b>{" "}
+            <Switch
+              checked={isChuaChamBai}
+              onChange={(value) => handleSearch(value, "cb")}
+            />
           </div>
         </div>
 
@@ -661,7 +782,12 @@ export default function DanhGiaMentorV2() {
           <Modal
             open={state.isModalChiTietDanhGiaVisible}
             title="Chi tiết đánh giá mentor"
-            onCancel={() => dispatchLocal({type: CONSTANTS.SET_MODAL_CHI_TIET_DANH_GIA_VISIBLE, payload: false})}
+            onCancel={() =>
+              dispatchLocal({
+                type: CONSTANTS.SET_MODAL_CHI_TIET_DANH_GIA_VISIBLE,
+                payload: false,
+              })
+            }
             footer={null}
             width="90vw"
             height="90vh"
@@ -670,53 +796,73 @@ export default function DanhGiaMentorV2() {
             <div className="container">
               <div className="row">
                 <div className="col-8">
-                  
-                  {
-                    state.recordDangChon && state.recordDangChon.dsDanhGiaGiangVien?.length > 0 ? 
+                  {state.recordDangChon &&
+                  state.recordDangChon.dsDanhGiaGiangVien?.length > 0 ? (
                     <>
-                      <h4 className="mb-2"
-                        >Giảng viên đánh giá</h4>
+                      <h4 className="mb-2">Giảng viên đánh giá</h4>
                       <br />
                       <br />
-                      {state.recordDangChon.dsDanhGiaGiangVien.map((item, indexCha) => {
-                      return <ChiTietDanhGiaMentorComponent  danhGia={item} danhMucDanhGia={danhMucDanhGia} indexCha={indexCha} key={`mentor_${indexCha}`}/>
-                    }) }
+                      {state.recordDangChon.dsDanhGiaGiangVien.map(
+                        (item, indexCha) => {
+                          return (
+                            <ChiTietDanhGiaMentorComponent
+                              danhGia={item}
+                              danhMucDanhGia={danhMucDanhGia}
+                              indexCha={indexCha}
+                              key={`mentor_${indexCha}`}
+                            />
+                          );
+                        }
+                      )}
                     </>
-                    : null
-                  }
+                  ) : null}
 
-                  {
-                    state.recordDangChon && state.recordDangChon.dsDanhGiaHocVien?.length > 0 ? 
-                    
+                  {state.recordDangChon &&
+                  state.recordDangChon.dsDanhGiaHocVien?.length > 0 ? (
                     <>
-                      <h4 className="mb-2"
-                        >Học viên đánh giá</h4>
+                      <h4 className="mb-2">Học viên đánh giá</h4>
                       <br />
-                      {state.recordDangChon.dsDanhGiaHocVien.map((item, indexCha) => {
-                      return <ChiTietDanhGiaMentorComponent danhGia={item} danhMucDanhGia={danhMucDanhGia} indexCha={indexCha} key={`hocVien_${indexCha}`} />
-                    })  }
+                      {state.recordDangChon.dsDanhGiaHocVien.map(
+                        (item, indexCha) => {
+                          return (
+                            <ChiTietDanhGiaMentorComponent
+                              danhGia={item}
+                              danhMucDanhGia={danhMucDanhGia}
+                              indexCha={indexCha}
+                              key={`hocVien_${indexCha}`}
+                            />
+                          );
+                        }
+                      )}
                     </>
-                    
-                    : null
-                  }
+                  ) : null}
 
-{
-                    state.recordDangChon && state.recordDangChon.dsDanhGiaMentor?.length > 0 ? 
-                    
+                  {state.recordDangChon &&
+                  state.recordDangChon.dsDanhGiaMentor?.length > 0 ? (
                     <>
-                    <h4 className="mb-2"
-                      >Mentor đánh giá</h4>
-                    <br />
-                    <br />
-                    {state.recordDangChon.dsDanhGiaMentor.map((item, indexCha) => {
-                      return <ChiTietDanhGiaMentorComponent danhGia={item} danhMucDanhGia={danhMucDanhGia} indexCha={indexCha} key={`giangVien_${indexCha}`} />
-                    }) }
-                  </>
-                    : null
-                  }
+                      <h4 className="mb-2">Mentor đánh giá</h4>
+                      <br />
+                      <br />
+                      {state.recordDangChon.dsDanhGiaMentor.map(
+                        (item, indexCha) => {
+                          return (
+                            <ChiTietDanhGiaMentorComponent
+                              danhGia={item}
+                              danhMucDanhGia={danhMucDanhGia}
+                              indexCha={indexCha}
+                              key={`giangVien_${indexCha}`}
+                            />
+                          );
+                        }
+                      )}
+                    </>
+                  ) : null}
                 </div>
                 <div className="col-4">
-                  <CheckBaiTapChuaCham record={state.recordDangChon} danhSachMentorChuaChamBai={danhSachMentorChuaChamBai} />
+                  <CheckBaiTapChuaCham
+                    record={state.recordDangChon}
+                    danhSachMentorChuaChamBai={danhSachMentorChuaChamBai}
+                  />
                 </div>
               </div>
             </div>
@@ -755,31 +901,36 @@ export default function DanhGiaMentorV2() {
 }
 
 function CheckBaiTapChuaCham(props) {
-  const {MentorId, MaLop} = props.record
-  const {danhSachMentorChuaChamBai} = props 
- 
-  if (danhSachMentorChuaChamBai) {
-    let isCoTenTrongDanhSach = danhSachMentorChuaChamBai.hasOwnProperty(MentorId);
-   
-    let isLopChuaCham = false
+  const { MentorId, MaLop } = props.record;
+  const { danhSachMentorChuaChamBai } = props;
 
-    if (isCoTenTrongDanhSach) 
-    {
-      isLopChuaCham = danhSachMentorChuaChamBai[MentorId].danhSachCacLopQuaHanCham.hasOwnProperty(MaLop)
+  if (danhSachMentorChuaChamBai) {
+    let isCoTenTrongDanhSach =
+      danhSachMentorChuaChamBai.hasOwnProperty(MentorId);
+
+    let isLopChuaCham = false;
+
+    if (isCoTenTrongDanhSach) {
+      isLopChuaCham =
+        danhSachMentorChuaChamBai[
+          MentorId
+        ].danhSachCacLopQuaHanCham.hasOwnProperty(MaLop);
     }
-    
-   
-    if (isCoTenTrongDanhSach && isLopChuaCham)
-    {
-      return <Tag style={{fontSize:"18px", fontWeight:"700"}} color="red">
-    {`Có ${Object.keys(danhSachMentorChuaChamBai[MentorId].danhSachCacLopQuaHanCham).length
-} bài tập quá hạn chưa chấm`}
-    </Tag>
+
+    if (isCoTenTrongDanhSach && isLopChuaCham) {
+      return (
+        <Tag style={{ fontSize: "18px", fontWeight: "700" }} color="red">
+          {`Có ${
+            Object.keys(
+              danhSachMentorChuaChamBai[MentorId].danhSachCacLopQuaHanCham
+            ).length
+          } bài tập quá hạn chưa chấm`}
+        </Tag>
+      );
     }
-    
   }
 
-  return null
+  return null;
 }
 
 function ButtonXuLy(props) {
@@ -852,7 +1003,9 @@ function ChiTietDanhGiaMentorComponent(props) {
 
   return (
     <ul className="list-group mb-2 shadow rounded">
-      <Tag color="red" style={{width: "35px", fontSize:"16px"}} >{indexCha + 1}</Tag>
+      <Tag color="red" style={{ width: "35px", fontSize: "16px" }}>
+        {indexCha + 1}
+      </Tag>
       {danhMucDanhGia?.map((danhMuc, index) => {
         let isCoNhanXet = danhGia[index].NhanXet.trim() !== "";
 
@@ -863,24 +1016,26 @@ function ChiTietDanhGiaMentorComponent(props) {
           >
             <b>{danhMuc}</b>
             <div>
-           
               <span className="badge badge-secondary badge-pill">
-                {isCoNhanXet ? ( <Tooltip title={danhGia[index].NhanXet}>
-                  <Badge
-                    count={
-                      <BulbFilled
-                        style={{
-                          color: "#f5222d",
-                        }}
+                {isCoNhanXet ? (
+                  <Tooltip  placement="right" title={danhGia[index].NhanXet}>
+                    <Badge
+                      count={
+                        <BulbFilled
+                          style={{
+                            color: "#f5222d",
+                          }}
+                        />
+                      }
+                    >
+                      <Rate
+                        value={danhGia[index].DiemDanhGia}
+                        disabled={true}
                       />
-                    }
-                  >
-                    
-                      <Rate value={danhGia[index].DiemDanhGia} disabled={true}/>
-                   
-                  </Badge> </Tooltip>
+                    </Badge>{" "}
+                  </Tooltip>
                 ) : (
-                  <Rate value={danhGia[index].DiemDanhGia} disabled={true}/>
+                  <Rate value={danhGia[index].DiemDanhGia} disabled={true} />
                 )}
               </span>
             </div>
