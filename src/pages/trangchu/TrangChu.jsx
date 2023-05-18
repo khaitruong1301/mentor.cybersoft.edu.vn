@@ -15,6 +15,7 @@ import {
 } from "../../redux/reducers/userReducer";
 import {
   callApiDanhSachDanhGia,
+  callApiDanhSachDanhGiaCrm,
   callApiMucDanhGia,
 } from "../../redux/reducers/danhGiaMentorReducer";
 import { useSearchParams } from "react-router-dom";
@@ -53,6 +54,8 @@ export default function TrangChu(props) {
 
     //call lay danh sach danh gia mentor
     dispatch(callApiDanhSachDanhGia());
+
+    dispatch(callApiDanhSachDanhGiaCrm());
   }, []);
 
   //check đá về page_redirect

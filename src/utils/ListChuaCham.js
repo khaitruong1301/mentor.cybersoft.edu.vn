@@ -81,36 +81,45 @@ export const ListChuaCham = (dsBaiTapDaCham) => {
 export const ListXepHangDanhGia = (danhSachDanhGia) => {
 
     let listDanhGia = [];
-    // console.log(danhSachDanhGia)
-    // danhSachDanhGia.map((item,index) => {
-    //     let { mentorId, noiDung } = item;
-    //     let checkDanhGia = listDanhGia.find(n => n.mentorId == mentorId);
-    //     console.log(noiDung, index)
-    //     let diemDanhGia = item && noiDung ? JSON.parse(noiDung) : [];
 
-    //     let congDiem = 0;
-    //     //check diem 4 va 5 thi moi cong
-    //     diemDanhGia.map(itemDiem => congDiem += itemDiem > 3 ? itemDiem : 0);
+    danhSachDanhGia.map((item,index) => {
+        let { mentorId, noiDung } = item;
+        let checkDanhGia = listDanhGia.find(n => n.mentorId == mentorId);
+            // noiDung = noiDung.replaceAll('\n', "")
+            try {
+                 let diemDanhGia = item && noiDung ? JSON.parse(noiDung) : [];
+ let congDiem = 0;
+        //check diem 4 va 5 thi moi cong
+        diemDanhGia.map(itemDiem => congDiem += itemDiem > 3 ? itemDiem : 0);
 
-    //     if (checkDanhGia) {
-    //         checkDanhGia.soLuong += 1;
-    //         checkDanhGia.tongDiem += congDiem;
-    //     }
-    //     else {
+        if (checkDanhGia) {
+            checkDanhGia.soLuong += 1;
+            checkDanhGia.tongDiem += congDiem;
+        }
+        else {
 
-    //         listDanhGia.push({
-    //             mentorId,
-    //             soLuong: 1,
-    //             tongDiem: congDiem
-    //         })
-    //     }
-    // })
+            listDanhGia.push({
+                mentorId,
+                soLuong: 1,
+                tongDiem: congDiem
+            })
+        }
 
-    // listDanhGia.sort((a, b) => b.tongDiem - a.tongDiem);
+            } catch (error) {
+                console.log(item)
+            }
+           
+       
+        
 
-    listDanhGia[0] = {...danhSachDanhGia[0],top:1};
-    listDanhGia[1] = {...danhSachDanhGia[1],top:2};
-    listDanhGia[2] = {...danhSachDanhGia[2],top:3};
+       
+    })
+
+    listDanhGia.sort((a, b) => b.tongDiem - a.tongDiem);
+
+    listDanhGia[0] = {...listDanhGia[0],top:1};
+    listDanhGia[1] = {...listDanhGia[1],top:2};
+    listDanhGia[2] = {...listDanhGia[2],top:3};
 
     return listDanhGia;
 

@@ -5,7 +5,8 @@ import { LopHocService } from '../../services/LopHocService';
 const initialState = {
   danhSachLop: [],
   dsChiNhanh: [],
-  dsBaiTapDaCham:null
+  dsBaiTapDaCham:null,
+  danhSachLopObject: {}
 };
 
 const lopHocReducer = createSlice({
@@ -13,6 +14,7 @@ const lopHocReducer = createSlice({
   initialState,
   reducers: {
     getDanhSachLop: (state, { type, payload }) => {
+      state.danhSachLopObject = Object.fromEntries(payload.map((x) => [x.id, x]))
       state.danhSachLop = payload;
 
     },

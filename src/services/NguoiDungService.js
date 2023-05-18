@@ -3,7 +3,7 @@ import { BaseApi } from './BaseService';
 const API_URL = "/api/nguoidung";
 
 const layDanhSachNguoiDungService = () => {
-    return BaseApi.get(`${API_URL}/v2`);
+    return BaseApi.get(API_URL);
 }
 const checkPassService = (model) => {
 

@@ -5,7 +5,7 @@ import { AdminService } from '../../services/AdminService';
 const initialState = {
   danhMucDanhGia: [],
   danhSachDanhGia: [],
-
+  danhSachDanhGiaCrm: []
 };
 
 const danhGiaMentorReducer = createSlice({
@@ -20,13 +20,18 @@ const danhGiaMentorReducer = createSlice({
       state.danhSachDanhGia = payload;
       return state;
     },
+    getDanhSachDanhGiaCrm: (state, { type, payload }) => {
+      state.danhSachDanhGiaCrm = payload;
+      return state;
+    },
   }
 });
 
 //quản lý actions
 export const {
   getDanhMucDanhGia,
-  getDanhSachDanhGia
+  getDanhSachDanhGia,
+  getDanhSachDanhGiaCrm
 } = danhGiaMentorReducer.actions
 
 export default danhGiaMentorReducer.reducer
@@ -43,4 +48,10 @@ export const callApiDanhSachDanhGia = () => async (dispatch) => {
   const apiDanhSachDanhGia = await AdminService.layDanhSachDanhGiaService();
 
   dispatch(getDanhSachDanhGia(apiDanhSachDanhGia.data.content));
+}
+
+export const callApiDanhSachDanhGiaCrm = () => async (dispatch) => {
+  const apiDanhSachDanhGiaCrm = await AdminService.layDanhSachDanhGiaCrmService();
+
+  dispatch(getDanhSachDanhGiaCrm(apiDanhSachDanhGiaCrm.data.content));
 }
