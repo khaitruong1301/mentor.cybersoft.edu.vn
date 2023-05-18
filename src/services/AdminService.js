@@ -21,10 +21,17 @@ const layDanhSachDanhGiaCrmService = () => {
     return BaseApi.get(`/api/danhgiamentor/lay-danh-gia-mentor-crm`);
 }
 
+const layDanhSachMentorChuaChamBaiService = () => {
+    return BaseApi.get(`/api/quan-ly-mentor/lay-tat-ca-mentor-chua-cham`);
+}
+
+
+
 export const AdminService = {
     layQuyenUserService,
     layNhomQuyenService,
     layDanhMucDanhGiaService,
     layDanhSachDanhGiaService,
-    layDanhSachDanhGiaCrmService
+    layDanhSachDanhGiaCrmService,
+    layDanhSachMentorChuaChamBaiService
 }

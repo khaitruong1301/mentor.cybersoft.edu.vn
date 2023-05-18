@@ -87,6 +87,11 @@ export default function DanhGiaMentorV2() {
     (state) => state.danhGiaMentorReducer.danhSachDanhGiaCrm
   );
 
+  const danhSachMentorChuaChamBai = useSelector(
+    (state) => state.danhGiaMentorReducer.danhSachMentorChuaChamBai
+  );
+
+
   let [searchParams, setSearchParams] = useSearchParams({
     type_search: "tenLop",
     value_search: "",
@@ -94,6 +99,8 @@ export default function DanhGiaMentorV2() {
     theo_month: "null",
     nx: "0",
     tieuChi: "[0,1,2,3,4,5]",
+    diemTu: "-1",
+    diemDen: "-1"
   });
 
   //get range date value
@@ -109,6 +116,8 @@ export default function DanhGiaMentorV2() {
   if (searchParams.get("tieuChi") != "null") {
     tieuChi = JSON.parse(searchParams.get("tieuChi"));
   }
+  let diemTu = Number(searchParams.get("diemTu"))
+  let diemDen = Number(searchParams.get("diemDen"))
 
   function tinhDiemDuaTheoTieuChi(dataDiem, tieuChiArray) {
     let count = 0;
@@ -216,10 +225,7 @@ export default function DanhGiaMentorV2() {
     });
   }
 
-  const handleGetAllTime = () => {
-    searchParams.set("theo_month", "null");
-    searchParams.set("theo_day", "null");
-  };
+  
 
   useEffect(() => {
     let isMount = true;
@@ -260,20 +266,30 @@ export default function DanhGiaMentorV2() {
     const arrTemp = await Promise.all(await asyncThing(data));
 
     return arrTemp.filter((item) => {
+
+      let isKiemTraDiemDanhGia = diemTu !== -1
+      let isDuDieuKien = true
+      if (isKiemTraDiemDanhGia) {
+          isDuDieuKien = (JSON.parse(item.NoiDungDanhGia)?.some((item) => item.DiemDanhGia >= diemTu && item.DiemDanhGia <= diemDen))
+          
+          
+          
+      }
+
       switch (type) {
         case "tenLop":
-          return checkString(item.TenLopHoc, inputValue);
+          return isDuDieuKien && checkString(item.TenLopHoc, inputValue) ;
         case "hoTen":
-          return checkString(item.HoTen, inputValue);
+          return isDuDieuKien && checkString(item.HoTen, inputValue);
 
         case "email":
-          return checkString(item.Email, inputValue);
+          return isDuDieuKien && checkString(item.Email, inputValue);
 
         case "soDienThoai":
-          return checkString(item.SoDT, inputValue);
+          return isDuDieuKien && checkString(item.SoDT, inputValue);
 
         default:
-          return item;
+          return false;
       }
     });
   }
@@ -315,6 +331,13 @@ export default function DanhGiaMentorV2() {
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const handleGetAllTime = () => {
+    searchParams.set("theo_month", "null");
+    searchParams.set("theo_day", "null");
+    setSearchParams(searchParams);
+    handleFilterData()
   };
 
   //hanlde search class
@@ -538,7 +561,7 @@ export default function DanhGiaMentorV2() {
             <Input.Group compact>
               <Radio.Button>Theo thời gian</Radio.Button>
               <RangePicker
-                defaultValue={
+                value={
                   rangeValue && [moment(rangeValue[0]), moment(rangeValue[1])]
                 }
                 format="DD/MM/YYYY"
@@ -574,6 +597,32 @@ export default function DanhGiaMentorV2() {
                 Lọc dữ liệu
               </button>
             </Input.Group>
+          </div>
+          <div className="col-md-8">
+
+          <Input.Group compact>
+     
+      <Input
+      addonBefore="Điểm đánh giá từ"
+        style={{
+          width: 185,
+          textAlign: 'center',
+        }}
+        onChange={(e) => handleSearch(e.target.value, "diemTu")}
+        defaultValue={diemTu}
+      />
+     
+      <Input
+      addonBefore="Đến"
+        className="site-input-right"
+        style={{
+          width: 100,
+          textAlign: 'center',
+        }}
+        onChange={(e) => handleSearch(e.target.value, "diemDen")}
+        defaultValue={diemDen}
+      />
+    </Input.Group>
           </div>
         </div>
 
@@ -667,7 +716,7 @@ export default function DanhGiaMentorV2() {
                   }
                 </div>
                 <div className="col-4">
-                  Thong tin co ban
+                  <CheckBaiTapChuaCham record={state.recordDangChon} danhSachMentorChuaChamBai={danhSachMentorChuaChamBai} />
                 </div>
               </div>
             </div>
@@ -703,6 +752,34 @@ export default function DanhGiaMentorV2() {
       </Modal> */}
     </>
   );
+}
+
+function CheckBaiTapChuaCham(props) {
+  const {MentorId, MaLop} = props.record
+  const {danhSachMentorChuaChamBai} = props 
+ 
+  if (danhSachMentorChuaChamBai) {
+    let isCoTenTrongDanhSach = danhSachMentorChuaChamBai.hasOwnProperty(MentorId);
+   
+    let isLopChuaCham = false
+
+    if (isCoTenTrongDanhSach) 
+    {
+      isLopChuaCham = danhSachMentorChuaChamBai[MentorId].danhSachCacLopQuaHanCham.hasOwnProperty(MaLop)
+    }
+    
+   
+    if (isCoTenTrongDanhSach && isLopChuaCham)
+    {
+      return <Tag style={{fontSize:"18px", fontWeight:"700"}} color="red">
+    {`Có ${Object.keys(danhSachMentorChuaChamBai[MentorId].danhSachCacLopQuaHanCham).length
+} bài tập quá hạn chưa chấm`}
+    </Tag>
+    }
+    
+  }
+
+  return null
 }
 
 function ButtonXuLy(props) {
@@ -772,6 +849,7 @@ function ButtonNhanXuLy(props) {
 
 function ChiTietDanhGiaMentorComponent(props) {
   const { danhGia, danhMucDanhGia, indexCha } = props;
+
   return (
     <ul className="list-group mb-2 shadow rounded">
       <Tag color="red" style={{width: "35px", fontSize:"16px"}} >{indexCha + 1}</Tag>
@@ -798,11 +876,11 @@ function ChiTietDanhGiaMentorComponent(props) {
                     }
                   >
                     
-                      <Rate defaultValue={danhGia[index].DiemDanhGia} disabled={true}/>
+                      <Rate value={danhGia[index].DiemDanhGia} disabled={true}/>
                    
                   </Badge> </Tooltip>
                 ) : (
-                  <Rate defaultValue={danhGia[index].DiemDanhGia} disabled={true}/>
+                  <Rate value={danhGia[index].DiemDanhGia} disabled={true}/>
                 )}
               </span>
             </div>

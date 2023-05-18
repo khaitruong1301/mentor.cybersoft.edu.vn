@@ -5,7 +5,8 @@ import { AdminService } from '../../services/AdminService';
 const initialState = {
   danhMucDanhGia: [],
   danhSachDanhGia: [],
-  danhSachDanhGiaCrm: []
+  danhSachDanhGiaCrm: [],
+  danhSachMentorChuaChamBai: {}
 };
 
 const danhGiaMentorReducer = createSlice({
@@ -24,6 +25,10 @@ const danhGiaMentorReducer = createSlice({
       state.danhSachDanhGiaCrm = payload;
       return state;
     },
+    getLayDanhSachMentorChuaChamBai: (state, { type, payload }) => {
+      state.danhSachMentorChuaChamBai = payload;
+      return state;
+    },
   }
 });
 
@@ -31,7 +36,8 @@ const danhGiaMentorReducer = createSlice({
 export const {
   getDanhMucDanhGia,
   getDanhSachDanhGia,
-  getDanhSachDanhGiaCrm
+  getDanhSachDanhGiaCrm,
+  getLayDanhSachMentorChuaChamBai
 } = danhGiaMentorReducer.actions
 
 export default danhGiaMentorReducer.reducer
@@ -54,4 +60,10 @@ export const callApiDanhSachDanhGiaCrm = () => async (dispatch) => {
   const apiDanhSachDanhGiaCrm = await AdminService.layDanhSachDanhGiaCrmService();
 
   dispatch(getDanhSachDanhGiaCrm(apiDanhSachDanhGiaCrm.data.content));
+}
+
+export const callApiLayDanhSachMentorChuaChamBai = () => async (dispatch) => {
+  const apiLayDanhSachMentorChuaChamBai = await AdminService.layDanhSachMentorChuaChamBaiService();
+
+  dispatch(getLayDanhSachMentorChuaChamBai(apiLayDanhSachMentorChuaChamBai.data.content));
 }
