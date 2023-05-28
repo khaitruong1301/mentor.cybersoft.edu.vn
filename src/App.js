@@ -12,6 +12,7 @@ import NotFound from "./pages/NotFound";
 import LopHoc from "./pages/lophoc/LopHoc";
 import { Loading } from "./hoc/loading/Loading";
 import DanhGiaMentorV2 from "./pages/danh-gia-mentor/DanhGiaMentorV2";
+import DanhGiaMentorV3 from "./pages/danh-gia-mentor/DanhGiaMentorV3";
 
 function App() {
   return (
@@ -23,7 +24,7 @@ function App() {
             <Route path="/lophoc" element={<LopHoc role="R_LOP" />} />
             <Route path="/lophoc/:token" element={<LopHoc role="R_LOP" />} />
             <Route path="/not" element={<NotFound role="C_LOP" />} />
-            <Route path="/danh-gia-mentor" element={<DanhGiaMentorV2 role="R_LOP" />} />
+            <Route path="/danh-gia-mentor" element={<DanhGiaMentorV3 role="R_LOP" />} />
             
           </Route>
 

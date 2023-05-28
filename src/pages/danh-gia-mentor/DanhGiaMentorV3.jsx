@@ -48,7 +48,7 @@ function asyncThing(value) {
   });
 }
 
-export default function DanhGiaMentorV2() {
+export default function DanhGiaMentorV3() {
   const reducer = (state, { type, payload }) => {
     switch (type) {
       case CONSTANTS.SET_IS_LOADING:
@@ -67,6 +67,7 @@ export default function DanhGiaMentorV2() {
           isModalChiTietDanhGiaVisible: payload,
         };
       case CONSTANTS.SET_RECORD_XEM_CHI_TIET_DANH_GIA:
+
         return {
           ...state,
           isModalChiTietDanhGiaVisible: true,
@@ -84,19 +85,21 @@ export default function DanhGiaMentorV2() {
     (state) => state.danhGiaMentorReducer.danhMucDanhGia
   );
 
-  const danhSachDanhGiaCrm = useSelector(
-    (state) => state.danhGiaMentorReducer.danhSachDanhGiaCrm
+  const danhSachDanhGiaCrmTheoThang = useSelector(
+    (state) => state.danhGiaMentorReducer.danhSachDanhGiaCrmTheoThang
   );
 
   const danhSachMentorChuaChamBai = useSelector(
     (state) => state.danhGiaMentorReducer.danhSachMentorChuaChamBai
   );
 
+
+
   let [searchParams, setSearchParams] = useSearchParams({
     type_search: "tenLop",
     value_search: "",
     theo_day: "null",
-    theo_month: "null",
+    theo_month: new Date,
     nx: 0,
     tieuChi: "[0,1,2,3,4,5]",
     diemTu: "-1",
@@ -112,7 +115,7 @@ export default function DanhGiaMentorV2() {
     rangeValue = [moment(rangeValue[0]), moment(rangeValue[1])];
   }
   let inputSearchType = searchParams.get("type_search");
-  let theoThang = searchParams.get("theo_month");
+  let theoThang = searchParams.get("theo_month") ? searchParams.get("theo_month") : "null" ;
   let inputSearchValue = searchParams.get("value_search");
   let tieuChi = null;
   if (searchParams.get("tieuChi") != "null") {
@@ -149,104 +152,104 @@ export default function DanhGiaMentorV2() {
     return tongDiem / count;
   }
 
-  async function mergeDuLieu(data) {
-    let arrayData = [];
+  // async function mergeDuLieu(data) {
+  //   let arrayData = [];
 
-    data.map(async (record) => {
-      let index = arrayData.findIndex((item) => {
-        return item.MentorId === record.MentorId;
-      });
-      let noiDungDanhGia = 
-      {
-        TenNguoiDanhGia: record.TenNguoiDanhGia,
-        ChiTietDanhGia : JSON.parse(record.NoiDungDanhGia)
-      } 
-      if (index === -1) {
-        let model = {
-          ...record,
-          dsDanhGiaGiangVien: [],
-          dsDanhGiaMentor: [],
-          dsDanhGiaHocVien: [],
-        };
+  //   data.map(async (record) => {
+  //     let index = arrayData.findIndex((item) => {
+  //       return item.MentorId === record.MentorId;
+  //     });
+  //     let noiDungDanhGia = 
+  //     {
+  //       TenNguoiDanhGia: record.TenNguoiDanhGia,
+  //       ChiTietDanhGia : []
+  //     } 
+  //     if (index === -1) {
+  //       let model = {
+  //         ...record,
+  //         dsDanhGiaGiangVien: [],
+  //         dsDanhGiaMentor: [],
+  //         dsDanhGiaHocVien: [],
+  //       };
         
-        switch (record.LoaiDanhGia) {
-          case "MENTOR":
-            model.dsDanhGiaMentor.push(noiDungDanhGia);
-            break;
-          case "GIANGVIEN":
-            model.dsDanhGiaGiangVien.push(noiDungDanhGia);
-            break;
-          default:
-            model.dsDanhGiaHocVien.push(noiDungDanhGia);
-        }
+  //       switch (record.LoaiDanhGia) {
+  //         case "MENTOR":
+  //           model.dsDanhGiaMentor.push(noiDungDanhGia);
+  //           break;
+  //         case "GIANGVIEN":
+  //           model.dsDanhGiaGiangVien.push(noiDungDanhGia);
+  //           break;
+  //         default:
+  //           model.dsDanhGiaHocVien.push(noiDungDanhGia);
+  //       }
 
-        arrayData.push(model);
-      } else {
-        let model = arrayData[index];
-        switch (record.LoaiDanhGia) {
-          case "MENTOR":
-            model.dsDanhGiaMentor.push(noiDungDanhGia);
-            break;
-          case "GIANGVIEN":
-            model.dsDanhGiaGiangVien.push(noiDungDanhGia);
-            break;
-          default:
-            model.dsDanhGiaHocVien.push(noiDungDanhGia);
-        }
-      }
-    });
+  //       arrayData.push(model);
+  //     } else {
+  //       let model = arrayData[index];
+  //       switch (record.LoaiDanhGia) {
+  //         case "MENTOR":
+  //           model.dsDanhGiaMentor.push(noiDungDanhGia);
+  //           break;
+  //         case "GIANGVIEN":
+  //           model.dsDanhGiaGiangVien.push(noiDungDanhGia);
+  //           break;
+  //         default:
+  //           model.dsDanhGiaHocVien.push(noiDungDanhGia);
+  //       }
+  //     }
+  //   });
 
-    function tinhDiemDanhGia(arrayData) {
+  //   function tinhDiemDanhGia(arrayData) {
      
-      return arrayData.map((item) => {
+  //     return arrayData.map((item) => {
    
-        let diemMentor =
-          item.dsDanhGiaMentor?.length === 0
-            ? 0
-            : tinhDiemDuaTheoTieuChi(item.dsDanhGiaMentor, tieuChi);
-        let diemHocVien =
-          item.dsDanhGiaHocVien?.length === 0
-            ? 0
-            : tinhDiemDuaTheoTieuChi(item.dsDanhGiaHocVien, tieuChi);
-        let diemGiangVien =
-          item.dsDanhGiaGiangVien?.length === 0
-            ? 0
-            : tinhDiemDuaTheoTieuChi(item.dsDanhGiaGiangVien, tieuChi);
+  //       let diemMentor =
+  //         item.dsDanhGiaMentor?.length === 0
+  //           ? 0
+  //           : tinhDiemDuaTheoTieuChi(item.dsDanhGiaMentor, tieuChi);
+  //       let diemHocVien =
+  //         item.dsDanhGiaHocVien?.length === 0
+  //           ? 0
+  //           : tinhDiemDuaTheoTieuChi(item.dsDanhGiaHocVien, tieuChi);
+  //       let diemGiangVien =
+  //         item.dsDanhGiaGiangVien?.length === 0
+  //           ? 0
+  //           : tinhDiemDuaTheoTieuChi(item.dsDanhGiaGiangVien, tieuChi);
 
-        let tongDiem = (
-          diemMentor * 0.3 +
-          diemHocVien * 0.4 +
-          diemGiangVien * 0.3
-        ).toFixed(2);
+  //       let tongDiem = (
+  //         diemMentor * 0.3 +
+  //         diemHocVien * 0.4 +
+  //         diemGiangVien * 0.3
+  //       ).toFixed(2);
 
-        let model = {
-          tongDiem,
-          diemMentor,
-          diemHocVien,
-          diemGiangVien,
-        };
+  //       let model = {
+  //         tongDiem,
+  //         diemMentor,
+  //         diemHocVien,
+  //         diemGiangVien,
+  //       };
 
-        item.DiemTrungBinhDanhGia = model;
+  //       item.DiemTrungBinhDanhGia = model;
 
-        return item;
-      });
-    }
+  //       return item;
+  //     });
+  //   }
 
-    dispatchLocal({
-      type: CONSTANTS.SET_DATA,
-      payload: tinhDiemDanhGia(arrayData),
-    });
-  }
+  //   dispatchLocal({
+  //     type: CONSTANTS.SET_DATA,
+  //     payload: tinhDiemDanhGia(arrayData),
+  //   });
+  // }
 
-  useEffect(() => {
-    let isMount = true;
-    if (isMount && danhSachDanhGiaCrm?.length > 0) {
-      mergeDuLieu(danhSachDanhGiaCrm);
-    }
-    return () => {
-      isMount = false;
-    };
-  }, [danhSachDanhGiaCrm.length]);
+  // useEffect(() => {
+  //   let isMount = true;
+  //   if (isMount && danhSachDanhGiaCrmTheoThang?.length > 0) {
+  //     mergeDuLieu(danhSachDanhGiaCrmTheoThang);
+  //   }
+  //   return () => {
+  //     isMount = false;
+  //   };
+  // }, [danhSachDanhGiaCrmTheoThang.length]);
 
   async function locTheoThang(data, dateCheck) {
     let formatMonth = "MM/yyyy";
@@ -304,32 +307,32 @@ export default function DanhGiaMentorV2() {
     const arrTemp = await Promise.all(await asyncThing(data));
 
     return arrTemp.filter((item) => {
-      let isKiemTraDiemDanhGia = diemTu !== -1;
+      // let isKiemTraDiemDanhGia = diemTu !== -1;
 
-      let isDuDieuKien = true;
-      if (isKiemTraDiemDanhGia) {
-        isDuDieuKien = JSON.parse(item.NoiDungDanhGia)?.some(
-          (item) => item.DiemDanhGia >= diemTu && item.DiemDanhGia <= diemDen
-        );
-      }
+      // let isDuDieuKien = true;
+      // if (isKiemTraDiemDanhGia) {
+      //   isDuDieuKien = JSON.parse(item.NoiDungDanhGia)?.some(
+      //     (item) => item.DiemDanhGia >= diemTu && item.DiemDanhGia <= diemDen
+      //   );
+      // }
 
-      if (isCoNhanXet) {
-        isDuDieuKien = JSON.parse(item.NoiDungDanhGia)?.some(
-          (item) => item.NhanXet.trim() !== ""
-        );
-      }
+      // if (isCoNhanXet) {
+      //   isDuDieuKien = JSON.parse(item.NoiDungDanhGia)?.some(
+      //     (item) => item.NhanXet.trim() !== ""
+      //   );
+      // }
 
       switch (type) {
         case "tenLop":
-          return isDuDieuKien && checkString(item.TenLopHoc, inputValue);
+          return  checkString(item.TenLopHoc, inputValue);
         case "hoTen":
-          return isDuDieuKien && checkString(item.HoTen, inputValue);
+          return  checkString(item.HoTen, inputValue);
 
         case "email":
-          return isDuDieuKien && checkString(item.Email, inputValue);
+          return  checkString(item.Email, inputValue);
 
         case "soDienThoai":
-          return isDuDieuKien && checkString(item.SoDT, inputValue);
+          return  checkString(item.SoDT, inputValue);
 
         default:
           return false;
@@ -341,8 +344,8 @@ export default function DanhGiaMentorV2() {
     try {
       let dataFiltered = [];
 
-      if (danhSachDanhGiaCrm?.length > 0) {
-        dataFiltered = danhSachDanhGiaCrm;
+      if (danhSachDanhGiaCrmTheoThang?.length > 0) {
+        dataFiltered = danhSachDanhGiaCrmTheoThang;
       }
 
       // Kiem tra xem co filter theo loai nguoi dung khong
@@ -353,17 +356,17 @@ export default function DanhGiaMentorV2() {
       }
 
       // Kiem tra xem co filter theo ngay thang gi khong
-      if (searchParams.get("theo_day") !== "null") {
-        locTheoKhoangThoiGian(dataFiltered, rangeValue).then((res) => {
-          dataFiltered = res;
-        });
-      }
+      // if (searchParams.get("theo_day") !== "null") {
+      //   locTheoKhoangThoiGian(dataFiltered, rangeValue).then((res) => {
+      //     dataFiltered = res;
+      //   });
+      // }
 
-      if (searchParams.get("theo_month") !== "null") {
-        locTheoThang(dataFiltered, theoThang).then((res) => {
-          dataFiltered = res;
-        });
-      }
+      // if (searchParams.get("theo_month") !== "null") {
+      //   locTheoThang(dataFiltered, theoThang).then((res) => {
+      //     dataFiltered = res;
+      //   });
+      // }
 
       if (danhSachMentorChuaChamBai && isChuaChamBai) {
         locChuaChamBai(dataFiltered, danhSachMentorChuaChamBai).then((res) => {
@@ -379,8 +382,8 @@ export default function DanhGiaMentorV2() {
             inputSearchType,
             inputSearchValue
           ).then((res) => {
-            mergeDuLieu(res);
-            //  dispatchLocal({type:CONSTANTS.SET_DATA, payload: res})
+            // mergeDuLieu(res);
+             dispatchLocal({type:CONSTANTS.SET_DATA, payload: res})
           });
         }
       });
@@ -467,7 +470,7 @@ export default function DanhGiaMentorV2() {
       dataIndex: "email",
     },
     {
-      title: "SoDienThoai",
+      title: "Số điện thoại",
       render: (text, record) => {
         return record.SoDT;
       },
@@ -475,43 +478,16 @@ export default function DanhGiaMentorV2() {
       dataIndex: "soDT",
     },
     {
-      title: "TenLop",
+      title: "Tên lớp",
       render: (text, record) => {
         return record.TenLopHoc;
       },
       key: "tenLopHoc",
       dataIndex: "tenLopHoc",
-    },
-    {
-      title: "Ngày đánh giá",
-      render: (text, record) => {
-        return moment(record.NgayTao).format("DD/MM/YYYY");
-      },
-      key: "ngayTao",
-      dataIndex: "ngayTao",
-    },
-    {
-      title: "Điểm trung bình đánh giá",
-      render: (text, record) => {
-        
-        return (
-          <Tooltip
-            title={`Điểm Mentor: ${record.DiemTrungBinhDanhGia?.diemMentor.toFixed(
-              2
-            )}, Điểm Học Viên: ${record.DiemTrungBinhDanhGia?.diemHocVien.toFixed(
-              2
-            )}, Điểm Giảng viên: ${record.DiemTrungBinhDanhGia?.diemGiangVien.toFixed(
-              2
-            )}`}
-          >
-            {record.DiemTrungBinhDanhGia?.tongDiem}
-          </Tooltip>
-        );
-      },
-      key: "DiemTrungBinh",
-      dataIndex: "DiemTrungBinh",
-      sorter: (a, b) =>
-        a.DiemTrungBinhDanhGia?.tongDiem - b.DiemTrungBinhDanhGia?.tongDiem,
+      onFilter: (value, record) => removeVietnameseTones(record.TenLopHoc.toString())
+      .toLowerCase()
+      .includes(removeVietnameseTones(value).toLowerCase()),
+    filterSearch: true,
     },
     {
       title: "Số lượng bài quá hạn chưa chấm",
@@ -545,25 +521,18 @@ export default function DanhGiaMentorV2() {
     {
       title: "Action",
       render: (text, record) => {
-        let soLuongDanhGiaGiangVien = record.dsDanhGiaGiangVien.length;
-        let soLuongDanhGiaMentor = record.dsDanhGiaMentor.length;
-        let soLuongDanhGiaHocVien = record.dsDanhGiaHocVien.length;
         return (
-          <Tooltip
-            title={`Đánh giá Mentor: ${soLuongDanhGiaMentor}, Đánh giá Học Viên: ${soLuongDanhGiaHocVien}, Đánh giá Giảng viên: ${soLuongDanhGiaGiangVien}`}
-          >
-            <button
-              className="btn btn-success"
-              onClick={() =>
-                dispatchLocal({
-                  type: CONSTANTS.SET_RECORD_XEM_CHI_TIET_DANH_GIA,
-                  payload: record,
-                })
-              }
-            >
-              Xem đánh giá
-            </button>
-          </Tooltip>
+          <button
+          className="btn btn-success"
+          onClick={() =>
+            dispatchLocal({
+              type: CONSTANTS.SET_RECORD_XEM_CHI_TIET_DANH_GIA,
+              payload: record,
+            })
+          }
+        >
+          Xem đánh giá
+        </button>
         );
       },
       key: "Action",
@@ -597,7 +566,7 @@ export default function DanhGiaMentorV2() {
               />
             </Input.Group>
           </div>
-          <div className="col-md-5">
+          {/* <div className="col-md-5">
             <Input.Group compact>
               <Radio.Button>Theo thời gian</Radio.Button>
               <RangePicker
@@ -609,13 +578,13 @@ export default function DanhGiaMentorV2() {
                 onChange={(date, dateS) => handleSearch(date, "theo_day")}
               />
             </Input.Group>
-          </div>
+          </div> */}
           <div className="col-md-4">
             <Input.Group compact>
               <Radio.Button>Theo tháng</Radio.Button>
               <MonthPicker
                 format={"MM/YYYY"}
-                value={theoThang != "null" && moment(theoThang)}
+                value={theoThang == "null" ? moment(): moment(theoThang)}
                 onChange={(date, dateS) => handleSearch(date, "theo_month")}
               />
             </Input.Group>
@@ -645,7 +614,7 @@ export default function DanhGiaMentorV2() {
               </button>
             </Input.Group>
           </div>
-          <div className="col-md-3">
+          {/* <div className="col-md-3">
             <Input.Group compact>
               <Input
                 addonBefore="Điểm đánh giá từ"
@@ -668,14 +637,14 @@ export default function DanhGiaMentorV2() {
                 defaultValue={diemDen}
               />
             </Input.Group>
-          </div>
-          <div className="col-md-2">
+          </div> */}
+          {/* <div className="col-md-2">
             <b>Có nhận xét:</b>{" "}
             <Switch
               checked={isCoNhanXet}
               onChange={(value) => handleSearch(value, "nx")}
             />
-          </div>
+          </div> */}
         </div>
         <div className="row mt-2">
           <div className="col-md-2">
@@ -733,257 +702,195 @@ export default function DanhGiaMentorV2() {
           >
             <div className="container">
 
-            {state.recordDangChon &&
-                  state.recordDangChon.dsDanhGiaHocVien?.length > 0 ? (
-                    <>
-                      <h4>Học viên đánh giá</h4>
-                      <div className="mb-2 row">
-                        {state.recordDangChon.dsDanhGiaHocVien.map(
-                        (item, indexCha) => {
-                          return (
-                            <ChiTietDanhGiaMentorComponent
-                              danhGia={item}
+            <ChiTietDanhGiaMentorComponent
+                              record={state.recordDangChon}
                               danhMucDanhGia={danhMucDanhGia}
-                              indexCha={indexCha}
-                              key={`mentor_${indexCha}`}
                             />
-                          );
-                        }
-                      )}
-                      </div>
-                    </>
-                  ) : null}
-
-                  {state.recordDangChon &&
-                  state.recordDangChon.dsDanhGiaGiangVien?.length > 0 ? (
-                    <>
-                    <h4>Giảng viên đánh giá</h4>
-                      <div className="mb-2 row">
-                        {state.recordDangChon.dsDanhGiaGiangVien.map(
-                        (item, indexCha) => {
-                          return (
-                            <ChiTietDanhGiaMentorComponent
-                              danhGia={item}
-                              danhMucDanhGia={danhMucDanhGia}
-                              indexCha={indexCha}
-                              key={`mentor_${indexCha}`}
-                            />
-                          );
-                        }
-                      )}
-                      </div>
-                      
-                    </>
-                  ) : null}
-
-                  {state.recordDangChon &&
-                  state.recordDangChon.dsDanhGiaMentor?.length > 0 ? (
-                    <>
-                      <h4>Mentor đánh giá</h4>
-                      <div className="mb-2 row">
-                        {state.recordDangChon.dsDanhGiaMentor.map(
-                        (item, indexCha) => {
-                          return (
-                            <ChiTietDanhGiaMentorComponent
-                              danhGia={item}
-                              danhMucDanhGia={danhMucDanhGia}
-                              indexCha={indexCha}
-                              key={`mentor_${indexCha}`}
-                            />
-                          );
-                        }
-                      )}
-                      </div>
-                    </>
-                  ) : null}
-               
-                {/* <div className="col-4">
-                  <CheckBaiTapChuaCham
-                    record={state.recordDangChon}
-                    danhSachMentorChuaChamBai={danhSachMentorChuaChamBai}
-                  />
-                </div> */}
-            
             </div>
           </Modal>
         </>
       )}
 
-      {/* <Modal
-        title="Xem đánh giá của học viên"
-        visible={isModalVisible}
-        onOk={handleLuu}
-        onCancel={handleCancel}
-        okText="Lưu"
-        cancelText="Đóng"
-      >
-        {khoKhanDangChon?.tenNguoiXuLy !== "" && (
-          <p>Người xử lý: {khoKhanDangChon?.tenNguoiXuLy}</p>
-        )}
-        <div className="form-group">
-          <span>Nội dung xử lý </span>
-          <br />
-          <AreaField
-            className="form-group"
-            label=" "
-            name="noiDungXuLy"
-            onChange={(e, editor) => {
-              setNoiDungXuLy(editor);
-            }}
-            value={khoKhanDangChon?.noiDungXuLy}
-            style={{ width: "100%" }}
-          />
-        </div>
-      </Modal> */}
     </>
   );
 }
 
-function CheckBaiTapChuaCham(props) {
-  const { MentorId, MaLop } = props.record;
-  const { danhSachMentorChuaChamBai } = props;
-
-  if (danhSachMentorChuaChamBai) {
-    let isCoTenTrongDanhSach =
-      danhSachMentorChuaChamBai.hasOwnProperty(MentorId);
-
-    let isLopChuaCham = false;
-
-    if (isCoTenTrongDanhSach) {
-      isLopChuaCham =
-        danhSachMentorChuaChamBai[
-          MentorId
-        ].danhSachCacLopQuaHanCham.hasOwnProperty(MaLop);
-    }
-
-    if (isCoTenTrongDanhSach && isLopChuaCham) {
-      return (
-        <Tag style={{ fontSize: "18px", fontWeight: "700" }} color="red">
-          {`Có ${
-            Object.keys(
-              danhSachMentorChuaChamBai[MentorId].danhSachCacLopQuaHanCham
-            ).length
-          } bài tập quá hạn chưa chấm`}
-        </Tag>
-      );
-    }
-  }
-
-  return null;
-}
-
-function ButtonXuLy(props) {
-  const { record, handleXuLyKhoKhan } = props;
-
-  let isDaXuLy = record?.noiDungXuLy !== "";
-
-  if (isDaXuLy) {
-    return (
-      <Button
-        type="primary"
-        style={{ background: "green", color: "white", borderColor: "green" }}
-        onClick={() => handleXuLyKhoKhan(record)}
-      >
-        Xem thông tin xử lý
-      </Button>
-    );
-  }
-  return (
-    <Button type="primary" onClick={() => handleXuLyKhoKhan(record)}>
-      Xử lý
-    </Button>
-  );
-}
-
-function ButtonNhanXuLy(props) {
-  const { record, handleNhanXuLy } = props;
-
-  let isChuaXuLy = record?.tenNguoiXuLy === "" && record?.noiDungXuLy === "";
-
-  let isDangXuLy = record?.tenNguoiXuLy !== "" && record?.noiDungXuLy === "";
-
-  let isDaXuLy = record?.tenNguoiXuLy !== "" && record?.noiDungXuLy !== "";
-
-  if (isChuaXuLy) {
-    return (
-      <Button
-        type="default"
-        style={{
-          background: "orange",
-          color: "black",
-          borderColor: "orange",
-          marginTop: "10px",
-        }}
-        onClick={() => handleNhanXuLy(record)}
-      >
-        Nhận xử lý
-      </Button>
-    );
-  }
-
-  if (isDangXuLy) {
-    return (
-      <p>
-        {record.tenNguoiXuLy} đang xử lý -{" "}
-        {moment(record.ngayXuLy).format("DD/MM/YYYY")}
-      </p>
-    );
-  }
-  return (
-    <p>
-      {record.tenNguoiXuLy} đã xử lý -{" "}
-      {moment(record.ngayXuLy).format("DD/MM/YYYY")}
-    </p>
-  );
-}
-
 function ChiTietDanhGiaMentorComponent(props) {
-  const { danhGia, danhMucDanhGia, indexCha } = props;
+  const { record, danhMucDanhGia } = props;
+  const [isHiddenName, setIsHiddenName] = useState(false)
+  const [dataTable, setDataTable] = useState([])
+  
+  let danhSachDanhGia = JSON.parse(record?.DanhSachDanhGia)
+
+  let lengthDanhSachDanhGia = danhSachDanhGia.length;
+
+  let lengthDanhMucDanhGia = danhMucDanhGia.length;
+
+  
+
+
+  useEffect(() => {
+    let isMount = true
+
+    if (isMount) {
+      let mangData = []
+
+    for(let i = 0; i < lengthDanhSachDanhGia; i++) {
+      let item = danhSachDanhGia[i]
+      item.isDanhGia = false
+     
+      let mangNoiDungDanhGia = []
+      if (item.NoiDungDanhGia){
+        mangNoiDungDanhGia = JSON.parse(item.NoiDungDanhGia);
+        item.isDanhGia = true
+      } 
+  
+      for(let j = 0; j < lengthDanhMucDanhGia; j++) {
+        let tenKey = danhMucDanhGia[j];
+        item[removeVietnameseTones(tenKey.replaceAll(" ",''))] = item.isDanhGia ? mangNoiDungDanhGia[j] : ""
+      }
+  
+      mangData.push(item)
+    }
+    setDataTable(mangData)
+    }
+    
+
+   
+  
+    return () => {
+      isMount = false
+    }
+  }, [record.MentorId, record.MaLop])
+    
+
+  
+
+ 
+
+  const columns = [
+    {
+      title: "Tên người dánh giá",
+      render: (text, record) => {
+        return isHiddenName ? "" : record.TenNguoiDanhGia;
+      },
+      key: "TenNguoiDanhGia",
+      dataIndex: "TenNguoiDanhGia",
+    },
+    {
+      title: "Loại đánh giá",
+      render: (text, record) => {
+        return record.LoaiDanhGia;
+      },
+      key: "LoaiDanhGia",
+      dataIndex: "LoaiDanhGia",
+    },
+    {
+      title: "Hỗ trợ trên lớp học",
+      render: (text, record) => {
+        return  <NhanXetHocVienComponent NhanXetHocVien={record.Hotrotrenlophoc} />;
+      },
+      key: "Hotrotrenlophoc",
+      dataIndex: "Hotrotrenlophoc",
+    },
+    {
+      title: "Ngôn từ giao tiếp",
+      render: (text, record) => {
+
+        return  <NhanXetHocVienComponent NhanXetHocVien={record.Ngontugiaotiep} />;
+      },
+      key: "Ngontugiaotiep",
+      dataIndex: "Ngontugiaotiep",
+    },
+    {
+      title: "Hỗ trợ ngoài giờ",
+      render: (text, record) => {
+       
+        return  <NhanXetHocVienComponent NhanXetHocVien={record.Hotrongoaigio} />;
+      },
+      key: "Hotrongoaigio",
+      dataIndex: "Hotrongoaigio",
+    },
+    {
+      title: "Nhiệt tình",
+      render: (text, record) => {
+
+        return  <NhanXetHocVienComponent NhanXetHocVien={record.Nhiettinh} />;
+      },
+      key: "Nhiettinh",
+      dataIndex: "Nhiettinh",
+    },
+    {
+      title: "Chia sẻ kiến thức",
+      render: (text, record) => {
+
+        return  <NhanXetHocVienComponent NhanXetHocVien={record.Chiasekienthuc} />;
+      },
+      key: "Chiasekienthuc",
+      dataIndex: "Chiasekienthuc",
+    },
+    {
+      title: "Thái độ hỗ trợ",
+      render: (text, record) => {
+
+        return  <NhanXetHocVienComponent NhanXetHocVien={record.Thaidohotro} />;
+      },
+      key: "Thaidohotro",
+      dataIndex: "Thaidohotro",
+    }
+  
+   
+    
+  ];
 
   return (
-    <Tooltip title={`${danhGia.TenNguoiDanhGia} đánh giá`}>
-        <ul className="list-group mb-2 shadow rounded col-3">
-      {/* <Tag color="red" style={{ width: "35px", fontSize: "16px" }}>
-        {indexCha + 1}
-      </Tag> */}
-      {danhMucDanhGia?.map((danhMuc, index) => {
-        let isCoNhanXet = danhGia.ChiTietDanhGia[index].NhanXet.trim() !== "";
+    <> 
+    <div>
+      <h4>{record.TenLopHoc} - {record.HoTen} - {}</h4> 
+      <div className="col-md-2">
+            <b>Ẩn tên người đánh giá:</b>{" "}
+            <Switch
+              checked={isHiddenName}
+              onChange={(value) => {
 
-        return (
-          <li
-            className="list-group-item d-flex justify-content-between align-items-center"
-            key={`sao_${indexCha}_${index}`}
-          >
-            <b>{danhMuc}</b>
-            <div>
-              <span className="badge badge-secondary badge-pill">
-                {isCoNhanXet ? (
-                  <Tooltip placement="right" title={danhGia.ChiTietDanhGia[index].NhanXet}>
-                    <Badge
-                      count={
-                        <BulbFilled
-                          style={{
-                            color: "#f5222d",
-                          }}
-                        />
-                      }
-                    >
-                      <Rate
-                        value={danhGia.ChiTietDanhGia[index].DiemDanhGia}
-                        disabled={true}
-                      />
-                    </Badge>{" "}
-                  </Tooltip>
-                ) : (
-                  <Rate value={danhGia.ChiTietDanhGia[index].DiemDanhGia} disabled={true} />
-                )}
-              </span>
-            </div>
-          </li>
-        );
-      })}
-    </ul>
-    </Tooltip>
-  
+                setIsHiddenName(value)
+              }}
+            />
+          </div>
+    </div>
+    <Table
+            bordered
+            dataSource={dataTable}
+            columns={columns}
+            pagination={{
+              defaultPageSize: 10,
+              pageSizeOptions: ["10", "15", "20", "30", "50"],
+              showSizeChanger: true,
+            }}
+            className="pr-3"
+          ></Table>
+    </>
+   
   );
+}
+function NhanXetHocVienComponent(props) {
+ 
+  const {DiemDanhGia, NhanXet} = props.NhanXetHocVien
+
+
+  // }
+  return (
+    <>
+    {
+        DiemDanhGia  ?  <h6>Điểm: {DiemDanhGia}</h6> : null
+      }
+     
+      {
+        (NhanXet && NhanXet?.trim() !== "") ? <h6>
+        Nhận xét : {NhanXet}
+          </h6> : null
+      }
+      
+    </>
+  )
 }

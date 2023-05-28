@@ -18,10 +18,12 @@ import {
   callApiDanhSachDanhGiaCrm,
   callApiLayDanhSachMentorChuaChamBai,
   callApiMucDanhGia,
+  callApiDanhSachDanhGiaCrmTheoThang
 } from "../../redux/reducers/danhGiaMentorReducer";
 import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { checkQuyenUser } from "../../utils/SelectOption";
+import moment from "moment";
 
 export default function TrangChu(props) {
   const dispatch = useDispatch();
@@ -59,6 +61,8 @@ export default function TrangChu(props) {
     dispatch(callApiDanhSachDanhGiaCrm());
 
     dispatch(callApiLayDanhSachMentorChuaChamBai());
+
+    dispatch(callApiDanhSachDanhGiaCrmTheoThang(new Date));
   }, []);
 
   //check đá về page_redirect
