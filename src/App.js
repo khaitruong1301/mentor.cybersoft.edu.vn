@@ -24,7 +24,7 @@ function App() {
             <Route path="/lophoc" element={<LopHoc role="R_LOP" />} />
             <Route path="/lophoc/:token" element={<LopHoc role="R_LOP" />} />
             <Route path="/not" element={<NotFound role="C_LOP" />} />
-            <Route path="/danh-gia-mentor" element={<DanhGiaMentorV3 role="R_LOP" />} />
+            <Route path="/danh-gia-mentor" element={<DanhGiaMentorV3 role="XL_MT" />} />
             
           </Route>
 

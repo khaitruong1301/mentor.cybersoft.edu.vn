@@ -25,9 +25,15 @@ const layDanhSachDanhGiaCrmTheoThangService = (model) => {
     return BaseApi.post(`/api/danhgiamentor/lay-danh-gia-mentor-crm-theo-thang`, model);
 }
 
+const themNhacNhoMentorService = (model) => {
+    return BaseApi.post(`/api/quan-ly-mentor/them-nhac-nho-mentor`, model);
+}
+
 const layDanhSachMentorChuaChamBaiService = () => {
     return BaseApi.get(`/api/quan-ly-mentor/lay-tat-ca-mentor-chua-cham`);
 }
+
+
 
 
 
@@ -38,5 +44,6 @@ export const AdminService = {
     layDanhSachDanhGiaService,
     layDanhSachDanhGiaCrmService,
     layDanhSachMentorChuaChamBaiService,
-    layDanhSachDanhGiaCrmTheoThangService
+    layDanhSachDanhGiaCrmTheoThangService,
+    themNhacNhoMentorService
 }

@@ -16,13 +16,19 @@ import {
   Rate,
   Badge,
   Switch,
+  Popconfirm,
 } from "antd";
 import { useSearchParams } from "react-router-dom";
 import moment from "moment";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { BulbFilled } from "@ant-design/icons";
 import { removeVietnameseTones } from "../../utils";
 import _ from "lodash";
+import {
+  callApiDanhSachDanhGiaCrmTheoThang, updateNhacNhoMentor
+} from "../../redux/reducers/danhGiaMentorReducer";
+
+import {AdminService} from '../../services/AdminService'
 
 const { Option } = Select;
 const { Search } = Input;
@@ -49,6 +55,8 @@ function asyncThing(value) {
 }
 
 export default function DanhGiaMentorV3() {
+  const dispatch = useDispatch();
+
   const reducer = (state, { type, payload }) => {
     switch (type) {
       case CONSTANTS.SET_IS_LOADING:
@@ -77,6 +85,8 @@ export default function DanhGiaMentorV3() {
         return state;
     }
   };
+
+
 
   const [state, dispatchLocal] = useReducer(reducer, initialState);
 
@@ -251,15 +261,7 @@ export default function DanhGiaMentorV3() {
   //   };
   // }, [danhSachDanhGiaCrmTheoThang.length]);
 
-  async function locTheoThang(data, dateCheck) {
-    let formatMonth = "MM/yyyy";
-    let strMonthCheck = moment(dateCheck).format(formatMonth);
-    const arrTemp = await Promise.all(await asyncThing(data));
-    return arrTemp.filter((item) => {
-      return moment(item.NgayTao).format(formatMonth) === strMonthCheck;
-    });
-  }
-
+ 
   async function locTheoLoaiNguoiDung(data, loaiNguoiDung) {
     let loaiNguoiDungCanCheck = loaiNguoiDung === 1 ? "GIANGVIEN" : "MENTOR";
     const arrTemp = await Promise.all(await asyncThing(data));
@@ -268,15 +270,6 @@ export default function DanhGiaMentorV3() {
     });
   }
 
-  async function locTheoKhoangThoiGian(data, rangeValue) {
-    const arrTemp = await Promise.all(await asyncThing(data));
-    return arrTemp.filter((item) => {
-      return moment(item.NgayTao).isBetween(
-        moment(rangeValue[0]),
-        moment(rangeValue[1])
-      );
-    });
-  }
 
   async function locChuaChamBai(data, danhSachMentorChuaChamBai) {
     const arrTemp = await Promise.all(await asyncThing(data));
@@ -392,12 +385,26 @@ export default function DanhGiaMentorV3() {
     }
   };
 
-  const handleGetAllTime = () => {
-    searchParams.set("theo_month", "null");
-    searchParams.set("theo_day", "null");
-    setSearchParams(searchParams);
-    handleFilterData();
-  };
+  // const handleGetAllTime = () => {
+  //   searchParams.set("theo_month", "null");
+  //   searchParams.set("theo_day", "null");
+  //   setSearchParams(searchParams);
+  //   handleFilterData();
+  // };
+
+  useEffect(() => {
+    let isMount = true
+
+    if (isMount)
+    {
+      handleFilterData();
+    }
+  
+    return () => {
+      isMount = false
+    }
+  }, [danhSachDanhGiaCrmTheoThang.length])
+  
 
   const handleResetFilter = () => {
     searchParams.set("theo_month", "null");
@@ -585,13 +592,13 @@ export default function DanhGiaMentorV3() {
               <MonthPicker
                 format={"MM/YYYY"}
                 value={theoThang == "null" ? moment(): moment(theoThang)}
-                onChange={(date, dateS) => handleSearch(date, "theo_month")}
+                onChange={(date, dateS) => dispatch(callApiDanhSachDanhGiaCrmTheoThang(date))}
               />
             </Input.Group>
           </div>
         </div>
         <div className="row mt-2">
-          <div className="col-md-2">
+          {/* <div className="col-md-2">
             <Tooltip title="Lấy tất cả khoảng thời gian đánh giá">
               <Input.Group compact>
                 <button className="btn btn-primary" onClick={handleGetAllTime}>
@@ -599,7 +606,7 @@ export default function DanhGiaMentorV3() {
                 </button>
               </Input.Group>
             </Tooltip>
-          </div>
+          </div> */}
           <div className="col-md-2">
             <Input.Group compact>
               <button className="btn btn-primary" onClick={handleFilterData}>
@@ -669,7 +676,7 @@ export default function DanhGiaMentorV3() {
           </div>
         </div>
       </div>
-      {state.isLoading ? (
+      {state.data.length === 0 ? (
         <div className="text-center">
           <Spin />
         </div>
@@ -717,15 +724,36 @@ export default function DanhGiaMentorV3() {
 
 function ChiTietDanhGiaMentorComponent(props) {
   const { record, danhMucDanhGia } = props;
+  const dispatch = useDispatch();
   const [isHiddenName, setIsHiddenName] = useState(false)
   const [dataTable, setDataTable] = useState([])
-  
+  const [danhSachNhacNho, setDanhSachNhacNho] = useState([])
+  const [isVisibleModalXemNhacNho, setIsVisibleModalXemNhacNho] = useState(false)
+  const [isVisibleThemNhacNhoModal, setIsVisibleThemNhacNhoModal] = useState(false)
+  const [modelNhacNho, setModelNhacNho] = useState({})
+
+  const dsNguoiDung = useSelector((state) => state.userReducer.dsNguoiDung);
+  const danhSachLop = useSelector((state) => state.lopHocReducer.danhSachLop);
   let danhSachDanhGia = JSON.parse(record?.DanhSachDanhGia)
 
   let lengthDanhSachDanhGia = danhSachDanhGia.length;
 
   let lengthDanhMucDanhGia = danhMucDanhGia.length;
 
+  useEffect(() => {
+    
+    let isMount = true
+
+  
+    if (isMount && record.DanhSachNhacNho !== null ) {
+      setDanhSachNhacNho(JSON.parse(record.DanhSachNhacNho))
+  } else {
+    setDanhSachNhacNho([])
+  }
+    return () => {
+      isMount = false
+    }
+  }, [record.MentorId])
   
 
 
@@ -753,7 +781,10 @@ function ChiTietDanhGiaMentorComponent(props) {
       mangData.push(item)
     }
     setDataTable(mangData)
-    }
+    
+    
+  
+  }
     
 
    
@@ -764,9 +795,75 @@ function ChiTietDanhGiaMentorComponent(props) {
   }, [record.MentorId, record.MaLop])
     
 
-  
+  const handleLuuThongTin = () => {
+    // console.log(record)
+      let model = {
+        MaLop: record.MaLop,
+        MaNguoiNhacNho: record.MentorId,
+        NoiDungNhacNho: modelNhacNho.noiDungNhacNho
+      }
 
- 
+      AdminService.themNhacNhoMentorService(model)
+      .then((res) => {
+        // Set lai model
+        message.info("Them thanh cong")
+
+        // Loi do reducer update nhung khong update lai table nen trick o day la push vao cai mang data hien tai
+        let newModelNhacNho = {
+          ...model,
+          Id: danhSachNhacNho.length+1,
+          DaXoa: false,
+          DateTime: new Date(),
+          UpdateAt: new Date(),
+          LyDoXoa: "",
+          MaNguoiXoa: "",
+        };
+        let newDanhSachNhacNho = [...danhSachNhacNho, newModelNhacNho]
+        setDanhSachNhacNho(newDanhSachNhacNho)
+
+        setModelNhacNho({})
+        setIsVisibleThemNhacNhoModal(false)
+        dispatch(updateNhacNhoMentor(model))
+      })
+  }
+
+  const columnNhacNho = [
+    {
+      title: "Tên người nhắc nhở",
+      render: (text, record) => {
+        return dsNguoiDung?.find(x => x.Id === record.MaNguoiNhacNho)?.HoTen;
+      },
+      key: "TenNguoiNhacNho",
+      dataIndex: "TenNguoiNhacNho",
+    },
+    {
+      title: "Lớp học",
+      render: (text, record) => {
+        
+        return danhSachLop?.find(x => x.id === record.MaLop)?.tenLopHoc;;
+      },
+      key: "NgayNhacNho",
+      dataIndex: "NgayNhacNho",
+    },
+    ,
+    {
+      title: "Ngày nhắc nhở",
+      render: (text, record) => {
+        return moment(record.NgayTao).format("DD/MM/yyyy");
+      },
+      key: "NgayNhacNho",
+      dataIndex: "NgayNhacNho",
+    },
+    {
+      title: "Nội dung nhắc nhở",
+      render: (text, record) => {
+        return record.NoiDungNhacNho;
+      },
+      key: "NoiDungNhacNho",
+      dataIndex: "NoiDungNhacNho",
+    }
+
+  ];
 
   const columns = [
     {
@@ -784,6 +881,7 @@ function ChiTietDanhGiaMentorComponent(props) {
       },
       key: "LoaiDanhGia",
       dataIndex: "LoaiDanhGia",
+      sorter: (a, b) => a.LoaiDanhGia.length - b.LoaiDanhGia.length,
     },
     {
       title: "Hỗ trợ trên lớp học",
@@ -837,22 +935,42 @@ function ChiTietDanhGiaMentorComponent(props) {
       },
       key: "Thaidohotro",
       dataIndex: "Thaidohotro",
+    },
+    ,
+    {
+      title: "Đánh giá",
+      render: (text, record) => {
+
+        return  record?.isDanhGia ? <p>X</p> : null;
+      },
+      key: "Thaidohotro",
+      dataIndex: "Thaidohotro",
+      sorter: (a, b) => a.isDanhGia - b.isDanhGia
     }
-  
-   
-    
   ];
+
+  const handleChangeInput = (e) => {
+    let newModelNhacNho = { ...modelNhacNho };
+    newModelNhacNho[e.target.name] = e.target.value;
+    setModelNhacNho(newModelNhacNho);
+  };
 
   return (
     <> 
     <div>
-      <h4>{record.TenLopHoc} - {record.HoTen} - {}</h4> 
+      <div className="d-flex justify-content-between">
+      <h5>{record.TenLopHoc} - {record.HoTen}</h5>
+      <Badge count={record?.DanhSachNhacNho ? danhSachNhacNho.length : 0}>
+      <button className="btn btn-primary" onClick={() => setIsVisibleModalXemNhacNho(true)}>Xem ghi chú</button>
+    </Badge>
+      </div>
+      
+      <h6>Có {dataTable?.filter(x => x.isDanhGia).length} / {dataTable.length} lượt đánh giá</h6>
       <div className="col-md-2">
             <b>Ẩn tên người đánh giá:</b>{" "}
             <Switch
               checked={isHiddenName}
               onChange={(value) => {
-
                 setIsHiddenName(value)
               }}
             />
@@ -869,13 +987,81 @@ function ChiTietDanhGiaMentorComponent(props) {
             }}
             className="pr-3"
           ></Table>
+            <Modal
+            open={isVisibleModalXemNhacNho}
+            title="Danh sách đã nhắc nhở"
+            onCancel={() =>
+              setIsVisibleModalXemNhacNho(false)
+            }
+            footer={null}
+            width="90vw"
+            height="90vh"
+            style={{ top: 10 }}
+          >
+            <div className="text-right mb-2">
+            <button className="btn btn-success " onClick={()=> setIsVisibleThemNhacNhoModal(true)}>Thêm nhắc nhở</button>
+            </div>
+           
+            <Table
+            bordered
+            dataSource={danhSachNhacNho}
+            columns={columnNhacNho}
+            pagination={{
+              defaultPageSize: 10,
+              pageSizeOptions: ["10", "15", "20", "30", "50"],
+              showSizeChanger: true,
+            }}
+            className="pr-3"
+          ></Table>
+          <Modal
+            open={isVisibleThemNhacNhoModal}
+            title="Them Nhac Nho"
+            onCancel={() =>
+              setIsVisibleThemNhacNhoModal(false)
+            }
+            footer={null}
+            width="50vw"
+            height="50vh"
+            style={{ top: 10 }}
+          >
+            <div className="container">
+          <div className="row">
+            <div className="col-12" id="editProjectForm">
+              
+              <div className="form-group">
+                <label className="font-bold">Nội dung nhắc nhở: </label>
+                <textarea
+                  className="form-control"
+                  name="noiDungNhacNho"
+                  rows={6}
+                  value={modelNhacNho?.noiDungNhacNho ? modelNhacNho.noiDungNhacNho : ""}
+                  onChange={(e) => handleChangeInput(e)}
+                  placeholder="Bạn hãy nhập nội dung đã nhắc nhở mentor"
+                />
+              </div>
+              <Popconfirm title="Bạn có chắc muốn thêm nhắc nhở" onConfirm={() => handleLuuThongTin()}>
+              <button
+                className="btn btn-primary"
+                
+              >
+                Thêm nhắc nhở
+              </button>
+              </Popconfirm>
+              
+            </div>
+          </div>
+        </div>
+
+          </Modal>
+          
+          </Modal>
     </>
    
   );
 }
 function NhanXetHocVienComponent(props) {
- 
-  const {DiemDanhGia, NhanXet} = props.NhanXetHocVien
+
+  const {DiemDanhGia, NhanXet} = props?.NhanXetHocVien
 
 
   // }

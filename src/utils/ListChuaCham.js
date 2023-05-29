@@ -106,7 +106,7 @@ export const ListXepHangDanhGia = (danhSachDanhGia) => {
         }
 
             } catch (error) {
-                console.log(item)
+                // console.log(item)
             }
            
        
