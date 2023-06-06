@@ -491,7 +491,7 @@ export default function DanhGiaMentorV3() {
     return 0;
   }
 
-  function tinhDiemTrungBinhDanhGiaHocVien(record) {
+  function tinhTongDiemTrungBinhDanhGia(record) {
  
     const DanhSachDanhGia = JSON.parse(record?.DanhSachDanhGia)
     
@@ -536,6 +536,160 @@ export default function DanhGiaMentorV3() {
   
       mangData.push(diem)
     }
+
+    return _.mean(mangData).toFixed(3)
+    
+  }
+
+  function tinhTongDanhGiaGiangVien(record) {
+ 
+    const DanhSachDanhGia = JSON.parse(record?.DanhSachDanhGia)
+    
+    let lengthDanhSachDanhGia = danhMucDanhGia?.length
+    let mangData = []
+
+    //hoc vien 40%
+    //mentor giang vien 30%
+
+
+    for(let i = 0; i < lengthDanhSachDanhGia; i++) {
+
+      
+      let item = DanhSachDanhGia[i]
+     if (item.LoaiDanhGia === "HOCVIEN" ||  item.LoaiDanhGia === "MENTOR" ) {
+      continue
+     }
+      let diem = 0
+
+      let mangNoiDungDanhGia = []
+      if (item.NoiDungDanhGia){
+        mangNoiDungDanhGia = JSON.parse(item.NoiDungDanhGia);
+      } 
+      
+      let mangDiem = []
+      let lengthDanhSachDanhGia = mangNoiDungDanhGia.length
+
+      if (lengthDanhSachDanhGia > 0) {
+        for(let j = 0; j < mangNoiDungDanhGia.length; j++) {
+        mangDiem.push(mangNoiDungDanhGia[j]?.DiemDanhGia)
+
+      }
+      }
+      
+ 
+      if (mangDiem.length > 0) {
+        diem = _.mean(mangDiem)
+      }
+  
+
+      
+  
+      mangData.push(diem)
+    }
+    if(mangData.length === 0) return 0
+    return _.mean(mangData).toFixed(3)
+    
+  }
+
+  function tinhTongDanhGiaHocVien(record) {
+ 
+    const DanhSachDanhGia = JSON.parse(record?.DanhSachDanhGia)
+    
+    let lengthDanhSachDanhGia = danhMucDanhGia?.length
+    let mangData = []
+
+    //hoc vien 40%
+    //mentor giang vien 30%
+
+
+    for(let i = 0; i < lengthDanhSachDanhGia; i++) {
+
+      
+      let item = DanhSachDanhGia[i]
+     if (item.LoaiDanhGia !== "HOCVIEN" ) {
+      continue
+     }
+      let diem = 0
+
+      let mangNoiDungDanhGia = []
+      if (item.NoiDungDanhGia){
+        mangNoiDungDanhGia = JSON.parse(item.NoiDungDanhGia);
+      } 
+      
+      let mangDiem = []
+      let lengthDanhSachDanhGia = mangNoiDungDanhGia.length
+
+      if (lengthDanhSachDanhGia > 0) {
+        for(let j = 0; j < mangNoiDungDanhGia.length; j++) {
+        mangDiem.push(mangNoiDungDanhGia[j]?.DiemDanhGia)
+
+      }
+      }
+      
+
+      if (mangDiem.length > 0) {
+        diem = _.mean(mangDiem)
+      }
+  
+
+      
+  
+      mangData.push(diem)
+    }
+
+    return _.mean(mangData).toFixed(3)
+    
+  }
+
+  function tinhTongDanhGiaMentor(record) {
+ 
+    const DanhSachDanhGia = JSON.parse(record?.DanhSachDanhGia)
+    
+    let lengthDanhSachDanhGia = danhMucDanhGia?.length
+    let mangData = []
+
+    //hoc vien 40%
+    //mentor giang vien 30%
+
+
+    for(let i = 0; i < lengthDanhSachDanhGia; i++) {
+
+      
+      let item = DanhSachDanhGia[i]
+
+      
+     if (item.LoaiDanhGia !== "MENTOR" ) {
+      continue
+     }
+      let diem = 0
+
+      let mangNoiDungDanhGia = []
+      if (item.NoiDungDanhGia){
+        mangNoiDungDanhGia = JSON.parse(item.NoiDungDanhGia);
+      } 
+      
+      let mangDiem = []
+      let lengthDanhSachDanhGia = mangNoiDungDanhGia.length
+
+      if (lengthDanhSachDanhGia > 0) {
+        for(let j = 0; j < mangNoiDungDanhGia.length; j++) {
+        mangDiem.push(mangNoiDungDanhGia[j]?.DiemDanhGia)
+
+      }
+      }
+      
+
+      if (mangDiem.length > 0) {
+        diem = _.mean(mangDiem)
+      }
+  
+
+      
+  
+      mangData.push(diem)
+    }
+
+    if(mangData.length === 0) return 0
 
     return _.mean(mangData).toFixed(3)
     
@@ -586,16 +740,52 @@ export default function DanhGiaMentorV3() {
       key: "SoLuongBaiQuaHanChuaCham",
       dataIndex: "SoLuongBaiQuaHanChuaCham",
       sorter: (a, b) => tinhSoBaiTapHetHanChuaCham(a) - tinhSoBaiTapHetHanChuaCham(b)
-    },
+    }
+    ,
     
       {
-        title: "Điểm trung bình đánh giá",
+        title: "Điểm học viên",
         render: (text, record) => {
-          return tinhDiemTrungBinhDanhGiaHocVien(record)
+          return tinhTongDanhGiaHocVien(record)
+        },
+        key: "diemHocVien",
+        dataIndex: "diemHocVien",
+        sorter: (a, b) => tinhTongDanhGiaHocVien(a) - tinhTongDanhGiaHocVien(b)
+      }
+
+      ,
+    
+      {
+        title: "Điểm mentor",
+        render: (text, record) => {
+          return tinhTongDanhGiaMentor(record)
+        },
+        key: "diemMentor",
+        dataIndex: "diemMentor",
+        sorter: (a, b) => tinhTongDanhGiaMentor(a) - tinhTongDanhGiaMentor(b)
+      }
+
+      ,
+    
+      {
+        title: "Điểm giảng viên",
+        render: (text, record) => {
+          return tinhTongDanhGiaGiangVien(record)
+        },
+        key: "diemGiangVien",
+        dataIndex: "diemGiangVien",
+        sorter: (a, b) => tinhTongDanhGiaGiangVien(a) - tinhTongDanhGiaGiangVien(b)
+      }
+    ,
+    
+      {
+        title: "Tổng điểm trung bình đánh giá",
+        render: (text, record) => {
+          return tinhTongDiemTrungBinhDanhGia(record)
         },
         key: "DiemTrungBinhDanhGia",
         dataIndex: "DiemTrungBinhDanhGia",
-        sorter: (a, b) => tinhDiemTrungBinhDanhGiaHocVien(a) - tinhDiemTrungBinhDanhGiaHocVien(b)
+        sorter: (a, b) => tinhTongDiemTrungBinhDanhGia(a) - tinhTongDiemTrungBinhDanhGia(b)
       }
   
 ,
