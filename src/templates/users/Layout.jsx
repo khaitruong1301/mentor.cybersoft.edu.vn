@@ -38,7 +38,7 @@ export default function Layout() {
       localStorage.setItem("USER_TOKEN", token);
       getQuyenUserVaCheck(tokenLocal);
     } else if (!tokenLocal && !token) {
-      // window.location = "https://www.google.com/";
+      window.location = "https://www.google.com/";
     } else if (tokenLocal && !token) {
       getQuyenUserVaCheck(tokenLocal);
     } else if (tokenLocal && token) {

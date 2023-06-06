@@ -61,8 +61,10 @@ export default function TrangChu(props) {
     dispatch(callApiDanhSachDanhGiaCrm());
 
     dispatch(callApiLayDanhSachMentorChuaChamBai());
-
-    dispatch(callApiDanhSachDanhGiaCrmTheoThang(new Date));
+    let thangTruoc = new Date();
+    thangTruoc.setDate(1);
+    thangTruoc.setMonth(thangTruoc.getMonth()-1);
+    dispatch(callApiDanhSachDanhGiaCrmTheoThang(thangTruoc));
   }, []);
 
   //check đá về page_redirect

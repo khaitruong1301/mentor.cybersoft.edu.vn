@@ -99,24 +99,32 @@ export default function DanhGiaMentorV3() {
     (state) => state.danhGiaMentorReducer.danhSachDanhGiaCrmTheoThang
   );
 
+  const isLoading = useSelector(
+    (state) => state.danhGiaMentorReducer.isLoading
+  );
+
   const danhSachMentorChuaChamBai = useSelector(
     (state) => state.danhGiaMentorReducer.danhSachMentorChuaChamBai
   );
 
-
+  let thangTruoc = new Date();
+    thangTruoc.setDate(1);
+    thangTruoc.setMonth(thangTruoc.getMonth()-1);
 
   let [searchParams, setSearchParams] = useSearchParams({
     type_search: "tenLop",
     value_search: "",
     theo_day: "null",
-    theo_month: new Date,
+    theo_month: thangTruoc,
     nx: 0,
     tieuChi: "[0,1,2,3,4,5]",
     diemTu: "-1",
     diemDen: "-1",
-    loai_gv: 0,
+    loai_gv: 2,
     cb: 0,
   });
+
+
 
   //get range date value
   let rangeValue = null;
@@ -124,6 +132,7 @@ export default function DanhGiaMentorV3() {
     rangeValue = JSON.parse(searchParams.get("theo_day"));
     rangeValue = [moment(rangeValue[0]), moment(rangeValue[1])];
   }
+
   let inputSearchType = searchParams.get("type_search");
   let theoThang = searchParams.get("theo_month") ? searchParams.get("theo_month") : "null" ;
   let inputSearchValue = searchParams.get("value_search");
@@ -134,7 +143,7 @@ export default function DanhGiaMentorV3() {
   let diemTu = Number(searchParams.get("diemTu"));
   let diemDen = Number(searchParams.get("diemDen"));
   let isCoNhanXet = +searchParams.get("nx");
-  let loaiNguoiDung = +searchParams.get("loai_gv");
+  let loaiNguoiDung = searchParams.get("loai_gv") ? +searchParams.get("loai_gv") : 2;
   let isChuaChamBai = +searchParams.get("cb");
 
   function tinhDiemDuaTheoTieuChi(dataDiem, tieuChiArray) {
@@ -457,7 +466,80 @@ export default function DanhGiaMentorV3() {
     setSearchParams(searchParams);
   };
 
+  function tinhSoBaiTapHetHanChuaCham(record) {
+   
+    const { MentorId, MaLop } = record;
+    if (danhSachMentorChuaChamBai) {
+      let isCoTenTrongDanhSach =
+        danhSachMentorChuaChamBai.hasOwnProperty(MentorId);
 
+      let isLopChuaCham = false;
+
+      if (isCoTenTrongDanhSach) {
+        isLopChuaCham =
+          danhSachMentorChuaChamBai[
+            MentorId
+          ].danhSachCacLopQuaHanCham.hasOwnProperty(MaLop);
+      }
+
+      if (isCoTenTrongDanhSach && isLopChuaCham) {
+        return Object.keys(
+          danhSachMentorChuaChamBai[MentorId].danhSachCacLopQuaHanCham
+        ).length;
+      }
+    }
+    return 0;
+  }
+
+  function tinhDiemTrungBinhDanhGiaHocVien(record) {
+ 
+    const DanhSachDanhGia = JSON.parse(record?.DanhSachDanhGia)
+    
+    let lengthDanhSachDanhGia = danhMucDanhGia?.length
+    let mangData = []
+
+    //hoc vien 40%
+    //mentor giang vien 30%
+
+
+    for(let i = 0; i < lengthDanhSachDanhGia; i++) {
+      let item = DanhSachDanhGia[i]
+     
+      let diem = 0
+
+      let mangNoiDungDanhGia = []
+      if (item.NoiDungDanhGia){
+        mangNoiDungDanhGia = JSON.parse(item.NoiDungDanhGia);
+      } 
+      
+      let mangDiem = []
+      let lengthDanhSachDanhGia = mangNoiDungDanhGia.length
+
+      if (lengthDanhSachDanhGia > 0) {
+        for(let j = 0; j < mangNoiDungDanhGia.length; j++) {
+        mangDiem.push(mangNoiDungDanhGia[j]?.DiemDanhGia)
+
+      }
+      }
+      
+
+      if (mangDiem.length > 0) {
+        diem = _.mean(mangDiem)
+      }
+  
+
+      if (item.LoaiDanhGia === "HOCVIEN") {
+        diem *= 0.4
+      } else {
+        diem *= 0.3
+      }
+  
+      mangData.push(diem)
+    }
+
+    return _.mean(mangData).toFixed(3)
+    
+  }
 
   const columns = [
     {
@@ -494,37 +576,29 @@ export default function DanhGiaMentorV3() {
       onFilter: (value, record) => removeVietnameseTones(record.TenLopHoc.toString())
       .toLowerCase()
       .includes(removeVietnameseTones(value).toLowerCase()),
-    filterSearch: true,
+    filterSearch: true
     },
     {
       title: "Số lượng bài quá hạn chưa chấm",
       render: (text, record) => {
-        const { MentorId, MaLop } = record;
-        if (danhSachMentorChuaChamBai) {
-          let isCoTenTrongDanhSach =
-            danhSachMentorChuaChamBai.hasOwnProperty(MentorId);
-
-          let isLopChuaCham = false;
-
-          if (isCoTenTrongDanhSach) {
-            isLopChuaCham =
-              danhSachMentorChuaChamBai[
-                MentorId
-              ].danhSachCacLopQuaHanCham.hasOwnProperty(MaLop);
-          }
-
-          if (isCoTenTrongDanhSach && isLopChuaCham) {
-            return Object.keys(
-              danhSachMentorChuaChamBai[MentorId].danhSachCacLopQuaHanCham
-            ).length;
-          }
-        }
-        return 0;
+        return tinhSoBaiTapHetHanChuaCham(record)
       },
       key: "SoLuongBaiQuaHanChuaCham",
-      dataIndex: "SoLuongBaiQuaHanChuaCham"
+      dataIndex: "SoLuongBaiQuaHanChuaCham",
+      sorter: (a, b) => tinhSoBaiTapHetHanChuaCham(a) - tinhSoBaiTapHetHanChuaCham(b)
     },
-
+    
+      {
+        title: "Điểm trung bình đánh giá",
+        render: (text, record) => {
+          return tinhDiemTrungBinhDanhGiaHocVien(record)
+        },
+        key: "DiemTrungBinhDanhGia",
+        dataIndex: "DiemTrungBinhDanhGia",
+        sorter: (a, b) => tinhDiemTrungBinhDanhGiaHocVien(a) - tinhDiemTrungBinhDanhGiaHocVien(b)
+      }
+  
+,
     {
       title: "Action",
       render: (text, record) => {
@@ -546,7 +620,9 @@ export default function DanhGiaMentorV3() {
       dataIndex: "Action",
     },
   ];
+  function handleGetDanhGiaMentorTheoThang(date) {
 
+  }
   return (
     <>
       <div className="container-fluid ">
@@ -591,8 +667,13 @@ export default function DanhGiaMentorV3() {
               <Radio.Button>Theo tháng</Radio.Button>
               <MonthPicker
                 format={"MM/YYYY"}
-                value={theoThang == "null" ? moment(): moment(theoThang)}
-                onChange={(date, dateS) => dispatch(callApiDanhSachDanhGiaCrmTheoThang(date))}
+                value={theoThang == "null" ? moment().subtract(1, 'months'): moment(theoThang)}
+                onChange={(date, dateS) => {
+                  // set lại url
+                  handleSearch(date, "theo_month")
+                  dispatch(callApiDanhSachDanhGiaCrmTheoThang(date))
+                }
+                  }
               />
             </Input.Group>
           </div>
@@ -676,7 +757,7 @@ export default function DanhGiaMentorV3() {
           </div>
         </div>
       </div>
-      {state.data.length === 0 ? (
+      {isLoading ? (
         <div className="text-center">
           <Spin />
         </div>
@@ -831,7 +912,8 @@ function ChiTietDanhGiaMentorComponent(props) {
     {
       title: "Tên người nhắc nhở",
       render: (text, record) => {
-        return dsNguoiDung?.find(x => x.Id === record.MaNguoiNhacNho)?.HoTen;
+        console.log(dsNguoiDung, record)
+        return dsNguoiDung?.find(x => x.id === record.MaNguoiNhacNho)?.hoTen;
       },
       key: "TenNguoiNhacNho",
       dataIndex: "TenNguoiNhacNho",

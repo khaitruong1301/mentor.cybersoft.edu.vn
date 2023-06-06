@@ -8,6 +8,7 @@ const initialState = {
   danhSachDanhGiaCrm: [],
   danhSachMentorChuaChamBai: {},
   danhSachDanhGiaCrmTheoThang: [],
+  isLoading: false
 };
 
 const danhGiaMentorReducer = createSlice({
@@ -32,6 +33,7 @@ const danhGiaMentorReducer = createSlice({
     },
     getDanhSachDanhGiaCrmTheoThang: (state, { type, payload }) => {
       state.danhSachDanhGiaCrmTheoThang = payload;
+      state.isLoading = false
       return state;
     },
     updateNhacNhoMentor: (state, { type, payload }) => {
@@ -80,6 +82,10 @@ const danhGiaMentorReducer = createSlice({
       return state
 
     },
+    updateLoading: (state, { type, payload }) => {
+      state.isLoading = payload;
+      return state;
+    },
   },
 });
 
@@ -91,6 +97,7 @@ export const {
   getLayDanhSachMentorChuaChamBai,
   getDanhSachDanhGiaCrmTheoThang,
   updateNhacNhoMentor,
+  updateLoading
 } = danhGiaMentorReducer.actions;
 
 export default danhGiaMentorReducer.reducer;
@@ -128,6 +135,9 @@ export const callApiLayDanhSachMentorChuaChamBai = () => async (dispatch) => {
 
 export const callApiDanhSachDanhGiaCrmTheoThang =
   (model) => async (dispatch) => {
+
+    dispatch(updateLoading(true))
+
     const apiDanhSachDanhGiaCrmTheoThang =
       await AdminService.layDanhSachDanhGiaCrmTheoThangService(model);
 
