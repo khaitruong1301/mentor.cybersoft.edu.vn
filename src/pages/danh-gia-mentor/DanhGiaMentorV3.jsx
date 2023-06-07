@@ -29,6 +29,7 @@ import {
 } from "../../redux/reducers/danhGiaMentorReducer";
 
 import {AdminService} from '../../services/AdminService'
+import { ClassStatusSwitch } from "../../utils/SelectOption";
 
 const { Option } = Select;
 const { Search } = Input;
@@ -106,6 +107,8 @@ export default function DanhGiaMentorV3() {
   const danhSachMentorChuaChamBai = useSelector(
     (state) => state.danhGiaMentorReducer.danhSachMentorChuaChamBai
   );
+
+ 
 
   let thangTruoc = new Date();
     thangTruoc.setDate(1);
@@ -412,7 +415,7 @@ export default function DanhGiaMentorV3() {
     return () => {
       isMount = false
     }
-  }, [danhSachDanhGiaCrmTheoThang.length])
+  }, [danhSachDanhGiaCrmTheoThang])
   
 
   const handleResetFilter = () => {
@@ -541,6 +544,20 @@ export default function DanhGiaMentorV3() {
     
   }
 
+  function tinhSoLopDangMentor(record)  {
+   
+    let soLopMentor = 0
+
+    let soLuongRecord = danhSachDanhGiaCrmTheoThang.length
+
+    for (let i = 0; i < soLuongRecord; i++) {
+      if (danhSachDanhGiaCrmTheoThang[i].MentorId === record.MentorId) {
+        soLopMentor++
+      }
+    }
+    return soLopMentor
+  }
+
   function tinhTongDanhGiaGiangVien(record) {
  
     const DanhSachDanhGia = JSON.parse(record?.DanhSachDanhGia)
@@ -580,10 +597,7 @@ export default function DanhGiaMentorV3() {
       if (mangDiem.length > 0) {
         diem = _.mean(mangDiem)
       }
-  
 
-      
-  
       mangData.push(diem)
     }
     if(mangData.length === 0) return 0
@@ -787,7 +801,18 @@ export default function DanhGiaMentorV3() {
         dataIndex: "DiemTrungBinhDanhGia",
         sorter: (a, b) => tinhTongDiemTrungBinhDanhGia(a) - tinhTongDiemTrungBinhDanhGia(b)
       }
-  
+      ,
+    
+      {
+        title: "Số lớp đang mentor ",
+        render: (text, record) => {
+          return tinhSoLopDangMentor(record)
+        },
+        key: "DiemTrungBinhDanhGia",
+        dataIndex: "DiemTrungBinhDanhGia",
+        sorter: (a, b) => tinhSoLopDangMentor(a) - tinhSoLopDangMentor(b)
+      }
+      
 ,
     {
       title: "Action",
@@ -1010,6 +1035,10 @@ function ChiTietDanhGiaMentorComponent(props) {
   let lengthDanhSachDanhGia = danhSachDanhGia.length;
 
   let lengthDanhMucDanhGia = danhMucDanhGia.length;
+
+
+
+
 
   useEffect(() => {
     
