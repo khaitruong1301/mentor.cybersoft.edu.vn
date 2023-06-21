@@ -840,6 +840,7 @@ export default function DanhGiaMentorV3() {
   }
   return (
     <>
+    <Spin tip="Loading...." spinning={isLoading}>
       <div className="container-fluid ">
         <div className="row">
           <div className="col-md-3">
@@ -954,7 +955,7 @@ export default function DanhGiaMentorV3() {
             <Input.Group compact>
               <Select
                 defaultValue={loaiNguoiDung}
-                style={{ width: "40%" }}
+                style={{ width: 100}}
                 onSelect={(value) => handleSearch(value, "loai_gv")}
               >
                 <Option value={0}>Tất cả</Option>
@@ -972,11 +973,7 @@ export default function DanhGiaMentorV3() {
           </div>
         </div>
       </div>
-      {isLoading ? (
-        <div className="text-center">
-          <Spin />
-        </div>
-      ) : (
+      
         <>
           <Table
             bordered
@@ -1012,7 +1009,8 @@ export default function DanhGiaMentorV3() {
             </div>
           </Modal>
         </>
-      )}
+       </Spin>
+      
 
     </>
   );
