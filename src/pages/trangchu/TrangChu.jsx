@@ -24,6 +24,7 @@ import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { checkQuyenUser } from "../../utils/SelectOption";
 import moment from "moment";
+import { callApiGetDanhSachMentorChiNhanh } from "../../redux/reducers/quanLyMentorReducer";
 
 export default function TrangChu(props) {
   const dispatch = useDispatch();
@@ -59,6 +60,8 @@ export default function TrangChu(props) {
     dispatch(callApiDanhSachDanhGia());
 
     dispatch(callApiDanhSachDanhGiaCrm());
+
+    dispatch(callApiGetDanhSachMentorChiNhanh());
 
     dispatch(callApiLayDanhSachMentorChuaChamBai());
     let thangTruoc = new Date();
