@@ -125,6 +125,7 @@ export default function DanhGiaMentorV3() {
     diemDen: "-1",
     loai_gv: 2,
     cb: 0,
+    thoiGianMentor: "Tatca"
   });
 
 
@@ -148,6 +149,22 @@ export default function DanhGiaMentorV3() {
   let isCoNhanXet = +searchParams.get("nx");
   let loaiNguoiDung = searchParams.get("loai_gv") ? +searchParams.get("loai_gv") : 2;
   let isChuaChamBai = +searchParams.get("cb");
+
+  const OPTIONS_THOI_GIAN_MENTOR = [
+    {
+      key: "Tatca",
+      value: "Tất cả"
+    },
+    {
+      key: "Sang",
+      value: "Sáng"
+    }
+    ,
+    {
+      key: "Chieu",
+      value: "Chiều"
+    }
+  ]
 
   function tinhDiemDuaTheoTieuChi(dataDiem, tieuChiArray) {
     let count = 0;
@@ -835,6 +852,7 @@ export default function DanhGiaMentorV3() {
       dataIndex: "Action",
     },
   ];
+  
   function handleGetDanhGiaMentorTheoThang(date) {
 
   }
@@ -878,6 +896,19 @@ export default function DanhGiaMentorV3() {
               />
             </Input.Group>
           </div> */}
+          <div className="col-md-2">
+            <span>Thời gian mentor: </span>
+            <Input.Group compact>
+              <Select
+                defaultValue={loaiNguoiDung}
+                style={{ width: 100}}
+                onSelect={(value) => handleSearch(value, "loai_gv")}
+                options={OPTIONS_THOI_GIAN_MENTOR}
+              >
+              
+              </Select>
+            </Input.Group>
+          </div>
           <div className="col-md-4">
             <Input.Group compact>
               <Radio.Button>Theo tháng</Radio.Button>
@@ -904,6 +935,7 @@ export default function DanhGiaMentorV3() {
               </Input.Group>
             </Tooltip>
           </div> */}
+
           <div className="col-md-2">
             <Input.Group compact>
               <button className="btn btn-primary" onClick={handleFilterData}>
