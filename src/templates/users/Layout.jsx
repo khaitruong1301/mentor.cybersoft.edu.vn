@@ -22,11 +22,11 @@ export default function Layout() {
       const checkQuyen = checkQuyenUser(res.data.content, "XL_MT");
       if (!checkQuyen) {
         // alert("Bạn không có quyền xem lớp học này");
-        // window.location = "https://www.google.com/";
+        window.location = "https://www.google.com/";
       }
     } catch (error) {
       console.log(error);
-      // window.location = "https://www.google.com/";
+      window.location = "https://www.google.com/";
     }
   };
 
@@ -38,7 +38,7 @@ export default function Layout() {
       localStorage.setItem("USER_TOKEN", token);
       getQuyenUserVaCheck(tokenLocal);
     } else if (!tokenLocal && !token) {
-      // window.location = "https://www.google.com/";
+      window.location = "https://www.google.com/";
     } else if (tokenLocal && !token) {
       getQuyenUserVaCheck(tokenLocal);
     } else if (tokenLocal && token) {

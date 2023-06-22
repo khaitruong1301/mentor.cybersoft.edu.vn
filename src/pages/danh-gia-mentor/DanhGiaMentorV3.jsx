@@ -91,10 +91,15 @@ export default function DanhGiaMentorV3() {
 
   const [state, dispatchLocal] = useReducer(reducer, initialState);
 
-  const dsNguoiDung = useSelector((state) => state.userReducer.dsNguoiDung);
+  // const dsNguoiDung = useSelector((state) => state.userReducer.dsNguoiDung);
   const danhMucDanhGia = useSelector(
     (state) => state.danhGiaMentorReducer.danhMucDanhGia
   );
+
+  const dsChiNhanh = useSelector((state) => state.lopHocReducer.dsChiNhanh)
+
+
+  const dsMentorChiNhanh = useSelector((state) => state.quanLyMentorReducer.danhSachMentorChiNhanh)
 
   const danhSachDanhGiaCrmTheoThang = useSelector(
     (state) => state.danhGiaMentorReducer.danhSachDanhGiaCrmTheoThang
@@ -125,7 +130,8 @@ export default function DanhGiaMentorV3() {
     diemDen: "-1",
     loai_gv: 2,
     cb: 0,
-    thoiGianMentor: "Tatca"
+    thoi_gian_mentor: "Tatca",
+    danh_sach_chi_nhanh_kiem_tra: "[]"
   });
 
 
@@ -150,21 +156,23 @@ export default function DanhGiaMentorV3() {
   let loaiNguoiDung = searchParams.get("loai_gv") ? +searchParams.get("loai_gv") : 2;
   let isChuaChamBai = +searchParams.get("cb");
 
+  let thoiGianMentor = searchParams.get("thoi_gian_mentor") ? searchParams.get("thoi_gian_mentor") : "Tatca";
+  let dsChiNhanhKiemTra = searchParams.get("danh_sach_chi_nhanh_kiem_tra") ? JSON.parse(searchParams.get("danh_sach_chi_nhanh_kiem_tra")) : []
+
   const OPTIONS_THOI_GIAN_MENTOR = [
     {
-      key: "Tatca",
-      value: "Tất cả"
+      value: "Sang",
+      label: "Sáng",
     },
     {
-      key: "Sang",
-      value: "Sáng"
-    }
-    ,
+      value: "Chieu",
+      label: "Chiều",
+    },
     {
-      key: "Chieu",
-      value: "Chiều"
-    }
-  ]
+      value: "Tatca",
+      label: "Tất cả",
+    },
+  ];
 
   function tinhDiemDuaTheoTieuChi(dataDiem, tieuChiArray) {
     let count = 0;
@@ -362,12 +370,63 @@ export default function DanhGiaMentorV3() {
     });
   }
 
+  function locDanhSachMentorCoTheMentor (dsMentorChiNhanh, thoiGianMentor, dsChiNhanhKiemTra, dataFiltered) {
+    let lsMentorCoTheMentor = []
+    for (let i = 0; i < dsMentorChiNhanh.length; i++) {
+        let record = dsMentorChiNhanh[i]
+
+        if (record.thoiGianMentor !== thoiGianMentor) {
+          continue
+        }
+
+        // neu ma khong chon chi nhanh thi lum het mentor dang ky vao
+    if (dsChiNhanhKiemTra.length === 0) {
+      lsMentorCoTheMentor.push(record.id)
+    } else {
+
+        let dsChiNhanhCoTheMentor = JSON.parse(record.danhSachChiNhanhMentor)
+        
+         for (let j = 0; j < dsChiNhanhCoTheMentor.length; j++) {
+          if (dsChiNhanhKiemTra.includes(dsChiNhanhCoTheMentor[j])) {
+            lsMentorCoTheMentor.push(record.id)
+            break;
+          }
+        }
+
+    }
+  }
+
+    let data = []
+    
+      for(let i = 0; i < dataFiltered.length; i++) {
+        let record = dataFiltered[i];
+        if (lsMentorCoTheMentor.includes(record.MentorId))
+        {
+          data.push(record)
+        }
+    }
+    
+    
+
+    return data
+  }
+
+
+
   const handleFilterData = async () => {
     try {
       let dataFiltered = [];
 
+
       if (danhSachDanhGiaCrmTheoThang?.length > 0) {
         dataFiltered = danhSachDanhGiaCrmTheoThang;
+      }
+
+      let isKiemTraChiNhanh = dsChiNhanhKiemTra.length > 0 ? true : false;
+      let isKiemTraThoiGianMentor = thoiGianMentor !== "Tatca" ? true : false
+
+      if (isKiemTraChiNhanh || isKiemTraThoiGianMentor) {
+        dataFiltered = locDanhSachMentorCoTheMentor(dsMentorChiNhanh, thoiGianMentor, dsChiNhanhKiemTra, dataFiltered)
       }
 
       // Kiem tra xem co filter theo loai nguoi dung khong
@@ -444,6 +503,8 @@ export default function DanhGiaMentorV3() {
     searchParams.set("nx", 0);
     searchParams.set("loai_gv", 0);
     searchParams.set("cb", 0);
+    searchParams.set("thoi_gian_mentor", "Tatca");
+    searchParams.set("danh_sach_chi_nhanh_kiem_tra", "[]");
     setSearchParams(searchParams);
     handleFilterData();
   };
@@ -860,7 +921,7 @@ export default function DanhGiaMentorV3() {
     <>
     <Spin tip="Loading...." spinning={isLoading}>
       <div className="container-fluid ">
-        <div className="row">
+        <div className="row mt-2">
           <div className="col-md-3">
             <Input.Group compact>
               <Select
@@ -896,19 +957,7 @@ export default function DanhGiaMentorV3() {
               />
             </Input.Group>
           </div> */}
-          <div className="col-md-2">
-            <span>Thời gian mentor: </span>
-            <Input.Group compact>
-              <Select
-                defaultValue={loaiNguoiDung}
-                style={{ width: 100}}
-                onSelect={(value) => handleSearch(value, "loai_gv")}
-                options={OPTIONS_THOI_GIAN_MENTOR}
-              >
-              
-              </Select>
-            </Input.Group>
-          </div>
+          
           <div className="col-md-4">
             <Input.Group compact>
               <Radio.Button>Theo tháng</Radio.Button>
@@ -924,6 +973,21 @@ export default function DanhGiaMentorV3() {
               />
             </Input.Group>
           </div>
+
+          <div className="col-md-3">
+           
+            <Input.Group compact>
+            <span className="mr-2" style={{lineHeight:"30px"}}>Thời gian mentor: </span>
+              <Select
+               value={thoiGianMentor}
+                style={{ width: 100}}
+                onSelect={(value) => handleSearch(value, "thoi_gian_mentor")}
+                options={OPTIONS_THOI_GIAN_MENTOR}
+              >
+              
+              </Select>
+            </Input.Group>
+          </div>
         </div>
         <div className="row mt-2">
           {/* <div className="col-md-2">
@@ -936,19 +1000,26 @@ export default function DanhGiaMentorV3() {
             </Tooltip>
           </div> */}
 
-          <div className="col-md-2">
-            <Input.Group compact>
-              <button className="btn btn-primary" onClick={handleFilterData}>
-                Lọc dữ liệu
-              </button>
-            </Input.Group>
-          </div>
-          <div className="col-md-2">
-            <Input.Group compact>
-              <button className="btn btn-primary" onClick={handleResetFilter}>
-                Clear Filter
-              </button>
-            </Input.Group>
+         
+          <div className="col-md-12">
+            <span className="text-left d-block mb-2">Danh sách chi nhánh check: </span>
+          <Select
+    mode="tags"
+    style={{
+      width: '100%',
+    }}
+    allowClear={true}
+    placeholder="Chọn chi nhánh cần kiểm tra"
+    value={dsChiNhanhKiemTra}
+   onChange={(value) => handleSearch(JSON.stringify(value), "danh_sach_chi_nhanh_kiem_tra")}
+    options={dsChiNhanh.map((item) =>  {
+      return {
+        key: item.id,
+        value: item.tenChiNhanh
+      }
+    })}
+  />
+
           </div>
           {/* <div className="col-md-3">
             <Input.Group compact>
@@ -1002,6 +1073,20 @@ export default function DanhGiaMentorV3() {
               checked={isChuaChamBai}
               onChange={(value) => handleSearch(value, "cb")}
             />
+          </div>
+          <div className="col-md-2">
+            <Input.Group compact>
+              <button className="btn btn-primary" onClick={handleFilterData}>
+                Lọc dữ liệu
+              </button>
+            </Input.Group>
+          </div>
+          <div className="col-md-2">
+            <Input.Group compact>
+              <button className="btn btn-primary" onClick={handleResetFilter}>
+                Clear Filter
+              </button>
+            </Input.Group>
           </div>
         </div>
       </div>
