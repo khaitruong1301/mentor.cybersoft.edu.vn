@@ -371,13 +371,28 @@ export default function DanhGiaMentorV3() {
   }
 
   function locDanhSachMentorCoTheMentor (dsMentorChiNhanh, thoiGianMentor, dsChiNhanhKiemTra, dataFiltered) {
+
+    // console.log({thoiGianMentor, dsChiNhanhKiemTra})
+
     let lsMentorCoTheMentor = []
     for (let i = 0; i < dsMentorChiNhanh.length; i++) {
         let record = dsMentorChiNhanh[i]
 
-        if (record.thoiGianMentor !== thoiGianMentor) {
-          continue
+        // Nếu chọn tất cả thì đá tụi sáng và chiều ra không xử lý
+       
+        if (thoiGianMentor === "Tatca") {
+          if (record.thoiGianMentor !== thoiGianMentor) {
+            continue
+          }
+        } else {
+          if (record.thoiGianMentor !== "Tatca" && record.thoiGianMentor !== thoiGianMentor) {
+            continue
+          }
         }
+
+        // Nếu chọn sáng hoặc chiều thì gom thêm thằng tất cả vào
+
+        
 
         // neu ma khong chon chi nhanh thi lum het mentor dang ky vao
     if (dsChiNhanhKiemTra.length === 0) {
@@ -396,6 +411,7 @@ export default function DanhGiaMentorV3() {
     }
   }
 
+  // console.log(lsMentorCoTheMentor)
     let data = []
     
       for(let i = 0; i < dataFiltered.length; i++) {
@@ -422,12 +438,11 @@ export default function DanhGiaMentorV3() {
         dataFiltered = danhSachDanhGiaCrmTheoThang;
       }
 
-      let isKiemTraChiNhanh = dsChiNhanhKiemTra.length > 0 ? true : false;
-      let isKiemTraThoiGianMentor = thoiGianMentor !== "Tatca" ? true : false
+      
 
-      if (isKiemTraChiNhanh || isKiemTraThoiGianMentor) {
+
         dataFiltered = locDanhSachMentorCoTheMentor(dsMentorChiNhanh, thoiGianMentor, dsChiNhanhKiemTra, dataFiltered)
-      }
+
 
       // Kiem tra xem co filter theo loai nguoi dung khong
       if (loaiNguoiDung > 0) {
@@ -1013,9 +1028,10 @@ export default function DanhGiaMentorV3() {
     value={dsChiNhanhKiemTra}
    onChange={(value) => handleSearch(JSON.stringify(value), "danh_sach_chi_nhanh_kiem_tra")}
     options={dsChiNhanh.map((item) =>  {
+      // console.log(item)
       return {
-        key: item.id,
-        value: item.tenChiNhanh
+        value: item.id,
+        label: item.tenChiNhanh
       }
     })}
   />
