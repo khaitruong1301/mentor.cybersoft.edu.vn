@@ -18,6 +18,7 @@ function App() {
   return (
     <div className="App">
       <HistoryRouter history={history}>
+        <div></div>
         <Routes>
           <Route element={<Layout />}>
             <Route path="/h" element={<TrangChu role="ANY" />} />
