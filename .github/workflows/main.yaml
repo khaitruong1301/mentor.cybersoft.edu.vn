@@ -1,0 +1,11 @@
+name: Deploy
+
+on: 
+  push:
+    branches: 
+      - deploy
+jobs:
+  say-hello:
+    runs-on: windows-latest
+    steps: 
+      - run: curl http://cicd.cyberlearn.vn/deploy-mentor
