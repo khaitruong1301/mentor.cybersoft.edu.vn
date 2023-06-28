@@ -4,7 +4,8 @@ import { NguoiDungService } from '../../services/NguoiDungService';
 
 const initialState = {
   dsNguoiDung:[],
-  dsKhachHang:[]
+  dsKhachHang:[],
+  dsNguoiDungObject: {}
 };
 
 const userReducer = createSlice({
@@ -13,7 +14,7 @@ const userReducer = createSlice({
   reducers: {
     getDanhSachNguoiDung: (state, { type, payload }) => {
       state.dsNguoiDung = payload;
-     
+      state.dsNguoiDungObject =Object.fromEntries( payload.map((x) => [x.id, x]))
     },
     getDanhSachKhachHang: (state, { type, payload }) => {
       state.dsKhachHang = payload;

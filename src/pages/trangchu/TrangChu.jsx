@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { callApiQuyen } from "../../redux/reducers/adminReducer";
+import { callApiQuyen, callApiConfig } from "../../redux/reducers/adminReducer";
 import {
   callApiBaiTapDaCham,
   callApiChiNhanh,
@@ -58,6 +58,9 @@ export default function TrangChu(props) {
 
     //call lay danh sach danh gia mentor
     dispatch(callApiDanhSachDanhGia());
+
+    //call lay danh sach config
+    dispatch(callApiConfig())
 
     dispatch(callApiDanhSachDanhGiaCrm());
 
