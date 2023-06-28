@@ -10,7 +10,8 @@ import { callApiKhachHang, callApiNguoiDung } from './userReducer';
 
 const initialState = {
   roleCom: null,
-  dsQuyen: []
+  dsQuyen: [],
+  dsConfig:[]
 };
 
 const adminReducer = createSlice({
@@ -19,7 +20,9 @@ const adminReducer = createSlice({
   reducers: {
     getDanhSachQuyen: (state, { type, payload }) => {
       state.dsQuyen = payload;
-
+    },
+    getDanhSachConfig: (state, { type, payload }) => {
+      state.dsConfig = payload;
     },
     setRoleCom: (state, { type, payload }) => {
 
@@ -66,7 +69,8 @@ const adminReducer = createSlice({
 export const {
   getDanhSachQuyen,
   getNhomQuyen,
-  setRoleCom
+  setRoleCom,
+  getDanhSachConfig
 } = adminReducer.actions
 
 export default adminReducer.reducer
@@ -79,4 +83,10 @@ export const callApiQuyen = (userId) => async (dispatch) => {
   const apiQuyen = await AdminService.layQuyenUserService(userId);
 
   dispatch(getDanhSachQuyen(apiQuyen.data.content));
+}
+
+export const callApiConfig = () => async (dispatch) => {
+  const apiConfig = await AdminService.layDanhSachConfigService();
+
+  dispatch(getDanhSachConfig(apiConfig.data.content));
 }

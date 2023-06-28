@@ -91,7 +91,14 @@ export default function DanhGiaMentorV3() {
 
   const [state, dispatchLocal] = useReducer(reducer, initialState);
 
-  // const dsNguoiDung = useSelector((state) => state.userReducer.dsNguoiDung);
+  const dsNguoiDungObject = useSelector((state) => state.userReducer.dsNguoiDungObject);
+
+  const danhSachLopObject = useSelector((state) => state.lopHocReducer.danhSachLopObject);
+  
+  const dsConfig = useSelector((state) => state.adminReducer.dsConfig)
+
+  const LICH_HOC = JSON.parse(dsConfig.find((item) => item.id === "LICH_HOC")?.noiDung)
+
   const danhMucDanhGia = useSelector(
     (state) => state.danhGiaMentorReducer.danhMucDanhGia
   );
@@ -130,8 +137,9 @@ export default function DanhGiaMentorV3() {
     diemDen: "-1",
     loai_gv: 2,
     cb: 0,
-    thoi_gian_mentor: "Tatca",
-    danh_sach_chi_nhanh_kiem_tra: "[]"
+    tgm: "Tatca",
+    dscnkt: "[]",
+    mtcl: 0
   });
 
 
@@ -156,8 +164,12 @@ export default function DanhGiaMentorV3() {
   let loaiNguoiDung = searchParams.get("loai_gv") ? +searchParams.get("loai_gv") : 2;
   let isChuaChamBai = +searchParams.get("cb");
 
-  let thoiGianMentor = searchParams.get("thoi_gian_mentor") ? searchParams.get("thoi_gian_mentor") : "Tatca";
-  let dsChiNhanhKiemTra = searchParams.get("danh_sach_chi_nhanh_kiem_tra") ? JSON.parse(searchParams.get("danh_sach_chi_nhanh_kiem_tra")) : []
+  let thoiGianMentor = searchParams.get("tgm") ? searchParams.get("tgm") : "Tatca";
+  let dsChiNhanhKiemTra = searchParams.get("dscnkt") ? JSON.parse(searchParams.get("dscnkt")) : []
+  let isChuaCoLopMentor = +searchParams.get("mtcl");
+
+
+  
 
   const OPTIONS_THOI_GIAN_MENTOR = [
     {
@@ -182,14 +194,14 @@ export default function DanhGiaMentorV3() {
     dataDiem.map((item) => {
    
       //moi item la mot array
-      item.ChiTietDanhGia.map((item, index) => {
+      item?.ChiTietDanhGia.map((item, index) => {
        
         //chi nhung index o vao tieu chi thi moi push vao arrayDiem
         if (tieuChiArray === null) {
-          tongDiem += item.DiemDanhGia;
+          tongDiem += item?.DiemDanhGia;
           count += 1;
         } else if (tieuChiArray.includes(index)) {
-          tongDiem += item.DiemDanhGia;
+          tongDiem += item?.DiemDanhGia;
           count += 1;
         }
       });
@@ -199,12 +211,25 @@ export default function DanhGiaMentorV3() {
     return tongDiem / count;
   }
 
+  useEffect(() => {
+    let isMount = true
+
+    if (isMount) {
+      handleFilterData()
+    }
+  
+    return () => {
+      isMount = false
+    }
+  }, [isChuaCoLopMentor])
+  
+
   // async function mergeDuLieu(data) {
   //   let arrayData = [];
 
   //   data.map(async (record) => {
   //     let index = arrayData.findIndex((item) => {
-  //       return item.MentorId === record.MentorId;
+  //       return item?.MentorId === record.MentorId;
   //     });
   //     let noiDungDanhGia = 
   //     {
@@ -251,17 +276,17 @@ export default function DanhGiaMentorV3() {
   //     return arrayData.map((item) => {
    
   //       let diemMentor =
-  //         item.dsDanhGiaMentor?.length === 0
+  //         item?.dsDanhGiaMentor?.length === 0
   //           ? 0
-  //           : tinhDiemDuaTheoTieuChi(item.dsDanhGiaMentor, tieuChi);
+  //           : tinhDiemDuaTheoTieuChi(item?.dsDanhGiaMentor, tieuChi);
   //       let diemHocVien =
-  //         item.dsDanhGiaHocVien?.length === 0
+  //         item?.dsDanhGiaHocVien?.length === 0
   //           ? 0
-  //           : tinhDiemDuaTheoTieuChi(item.dsDanhGiaHocVien, tieuChi);
+  //           : tinhDiemDuaTheoTieuChi(item?.dsDanhGiaHocVien, tieuChi);
   //       let diemGiangVien =
-  //         item.dsDanhGiaGiangVien?.length === 0
+  //         item?.dsDanhGiaGiangVien?.length === 0
   //           ? 0
-  //           : tinhDiemDuaTheoTieuChi(item.dsDanhGiaGiangVien, tieuChi);
+  //           : tinhDiemDuaTheoTieuChi(item?.dsDanhGiaGiangVien, tieuChi);
 
   //       let tongDiem = (
   //         diemMentor * 0.3 +
@@ -370,10 +395,30 @@ export default function DanhGiaMentorV3() {
     });
   }
 
-  function locDanhSachMentorCoTheMentor (dsMentorChiNhanh, thoiGianMentor, dsChiNhanhKiemTra, dataFiltered) {
+  function locDanhSachMentorDangCoLopCoTheMentor (dsMentorChiNhanh, thoiGianMentor, dsChiNhanhKiemTra, dataFiltered) {
 
     // console.log({thoiGianMentor, dsChiNhanhKiemTra})
 
+    let lsMentorCoTheMentor = locCacMentorCoTheMentorTheoChiNhanhVaThoiGian(dsMentorChiNhanh,thoiGianMentor,dsChiNhanhKiemTra)
+
+  // console.log(lsMentorCoTheMentor)
+    let data = []
+    
+      for(let i = 0; i < dataFiltered.length; i++) {
+        let record = dataFiltered[i];
+        // console.log(record)
+        if (lsMentorCoTheMentor.includes(record.MentorId))
+        {
+          data.push(record)
+        }
+    }
+    
+    
+
+    return data
+  }
+
+  function locCacMentorCoTheMentorTheoChiNhanhVaThoiGian(dsMentorChiNhanh,thoiGianMentor,dsChiNhanhKiemTra) {
     let lsMentorCoTheMentor = []
     for (let i = 0; i < dsMentorChiNhanh.length; i++) {
         let record = dsMentorChiNhanh[i]
@@ -392,8 +437,6 @@ export default function DanhGiaMentorV3() {
 
         // Nếu chọn sáng hoặc chiều thì gom thêm thằng tất cả vào
 
-        
-
         // neu ma khong chon chi nhanh thi lum het mentor dang ky vao
     if (dsChiNhanhKiemTra.length === 0) {
       lsMentorCoTheMentor.push(record.id)
@@ -410,15 +453,50 @@ export default function DanhGiaMentorV3() {
 
     }
   }
+  return lsMentorCoTheMentor
+  }
 
+  function locDanhSachMentorChuaCoLopCoTheMentor(dsMentorChiNhanh, thoiGianMentor, dsChiNhanhKiemTra, dataFiltered) {
+    // Mentor chua co lop la cac mentor thoa dieu kien nhung khong nam trong datafiletered
+
+    let lsMentorCoTheMentor = locCacMentorCoTheMentorTheoChiNhanhVaThoiGian(dsMentorChiNhanh,thoiGianMentor,dsChiNhanhKiemTra)
+
+    let lsMentorDaCoLop = []
+
+    for(let i = 0; i < dataFiltered.length; i++) {
+      let lopHoc = dataFiltered[i] 
+      if (lsMentorDaCoLop.includes(lopHoc.MentorId)) {
+        // co roi thi next
+        continue;
+      }
+      lsMentorDaCoLop.push(lopHoc.MentorId)
+    }
+// console.log(lsMentorCoTheMentor)
   // console.log(lsMentorCoTheMentor)
     let data = []
+
+  
     
-      for(let i = 0; i < dataFiltered.length; i++) {
-        let record = dataFiltered[i];
-        if (lsMentorCoTheMentor.includes(record.MentorId))
+      for(let i = 0; i < lsMentorCoTheMentor.length; i++) {
+        let mentorId = lsMentorCoTheMentor[i];
+    //  console.log(lsMentorDaCoLop)
+        if (!lsMentorDaCoLop.includes(mentorId))
         {
-          data.push(record)
+          let {hoTen, email, soDT} = dsNguoiDungObject[mentorId]
+          let {thoiGianMentor, danhSachChiNhanhMentor} = dsMentorChiNhanh.find(item => item.id === mentorId)
+          data.push({
+            MentorId: mentorId,
+            HoTen: hoTen,
+            Email: email,
+            SoDT: soDT,
+            MaNhomQuyen: "MENTOR",
+            TenLopHoc: "Chưa có lớp",
+            MaLop: 0,
+            DanhSachDanhGia: '[]',
+            DanhSachNhacNho: null,
+            ThoiGianMentor: thoiGianMentor,
+            DanhSachChiNhanhMentor: danhSachChiNhanhMentor
+          })
         }
     }
     
@@ -438,11 +516,15 @@ export default function DanhGiaMentorV3() {
         dataFiltered = danhSachDanhGiaCrmTheoThang;
       }
 
-      
+      if (isChuaCoLopMentor) {
+        dataFiltered = locDanhSachMentorChuaCoLopCoTheMentor(dsMentorChiNhanh, thoiGianMentor, dsChiNhanhKiemTra, dataFiltered)
+      } else {
+    dataFiltered = locDanhSachMentorDangCoLopCoTheMentor(dsMentorChiNhanh, thoiGianMentor, dsChiNhanhKiemTra, dataFiltered)
+      }
+       
 
-
-        dataFiltered = locDanhSachMentorCoTheMentor(dsMentorChiNhanh, thoiGianMentor, dsChiNhanhKiemTra, dataFiltered)
-
+    
+      // console.log(dataFiltered)
 
       // Kiem tra xem co filter theo loai nguoi dung khong
       if (loaiNguoiDung > 0) {
@@ -518,8 +600,9 @@ export default function DanhGiaMentorV3() {
     searchParams.set("nx", 0);
     searchParams.set("loai_gv", 0);
     searchParams.set("cb", 0);
-    searchParams.set("thoi_gian_mentor", "Tatca");
-    searchParams.set("danh_sach_chi_nhanh_kiem_tra", "[]");
+    searchParams.set("mtcl", 0);
+    searchParams.set("tgm", "Tatca");
+    searchParams.set("dscnkt", "[]");
     setSearchParams(searchParams);
     handleFilterData();
   };
@@ -553,13 +636,22 @@ export default function DanhGiaMentorV3() {
         break;
       }
 
+      case "mtcl": {
+    
+        searchParams.set(name, value ? 1 : 0);
+        break;
+      }
+
       default: {
         searchParams.set(name, value);
         break;
       }
     }
 
-    setSearchParams(searchParams);
+    setSearchParams(searchParams)
+
+   
+    
   };
 
   function tinhSoBaiTapHetHanChuaCham(record) {
@@ -604,8 +696,8 @@ export default function DanhGiaMentorV3() {
       let diem = 0
 
       let mangNoiDungDanhGia = []
-      if (item.NoiDungDanhGia){
-        mangNoiDungDanhGia = JSON.parse(item.NoiDungDanhGia);
+      if (item?.NoiDungDanhGia){
+        mangNoiDungDanhGia = JSON.parse(item?.NoiDungDanhGia);
       } 
       
       let mangDiem = []
@@ -624,7 +716,7 @@ export default function DanhGiaMentorV3() {
       }
   
 
-      if (item.LoaiDanhGia === "HOCVIEN") {
+      if (item?.LoaiDanhGia === "HOCVIEN") {
         diem *= 0.4
       } else {
         diem *= 0.3
@@ -666,14 +758,14 @@ export default function DanhGiaMentorV3() {
 
       
       let item = DanhSachDanhGia[i]
-     if (item.LoaiDanhGia === "HOCVIEN" ||  item.LoaiDanhGia === "MENTOR" ) {
+     if (item?.LoaiDanhGia === "HOCVIEN" ||  item?.LoaiDanhGia === "MENTOR" ) {
       continue
      }
       let diem = 0
 
       let mangNoiDungDanhGia = []
-      if (item.NoiDungDanhGia){
-        mangNoiDungDanhGia = JSON.parse(item.NoiDungDanhGia);
+      if (item?.NoiDungDanhGia){
+        mangNoiDungDanhGia = JSON.parse(item?.NoiDungDanhGia);
       } 
       
       let mangDiem = []
@@ -713,14 +805,14 @@ export default function DanhGiaMentorV3() {
 
       
       let item = DanhSachDanhGia[i]
-     if (item.LoaiDanhGia !== "HOCVIEN" ) {
+     if (item?.LoaiDanhGia !== "HOCVIEN" ) {
       continue
      }
       let diem = 0
 
       let mangNoiDungDanhGia = []
-      if (item.NoiDungDanhGia){
-        mangNoiDungDanhGia = JSON.parse(item.NoiDungDanhGia);
+      if (item?.NoiDungDanhGia){
+        mangNoiDungDanhGia = JSON.parse(item?.NoiDungDanhGia);
       } 
       
       let mangDiem = []
@@ -748,6 +840,8 @@ export default function DanhGiaMentorV3() {
     
   }
 
+ 
+
   function tinhTongDanhGiaMentor(record) {
  
     const DanhSachDanhGia = JSON.parse(record?.DanhSachDanhGia)
@@ -765,14 +859,14 @@ export default function DanhGiaMentorV3() {
       let item = DanhSachDanhGia[i]
 
       
-     if (item.LoaiDanhGia !== "MENTOR" ) {
+     if (item?.LoaiDanhGia !== "MENTOR" ) {
       continue
      }
       let diem = 0
 
       let mangNoiDungDanhGia = []
-      if (item.NoiDungDanhGia){
-        mangNoiDungDanhGia = JSON.parse(item.NoiDungDanhGia);
+      if (item?.NoiDungDanhGia){
+        mangNoiDungDanhGia = JSON.parse(item?.NoiDungDanhGia);
       } 
       
       let mangDiem = []
@@ -802,7 +896,80 @@ export default function DanhGiaMentorV3() {
     
   }
 
-  const columns = [
+  function taoThongTinTenLopHoc(maLop, LICH_HOC) {
+
+    
+    const {tenLopHoc, ngayKetThuc, thoiKhoaBieu, chiNhanh} = danhSachLopObject[maLop]
+
+    
+
+    return (
+      <>
+       <p>{tenLopHoc}</p>
+       <Tag color="red">{dsChiNhanh.find((chiNhanhMau) => chiNhanhMau.id === chiNhanh)?.tenChiNhanh} </Tag>
+     <p><span>Ngày kết thúc: </span> {moment(ngayKetThuc).format("DD/MM/yyyy")}</p>
+     <p>
+      {JSON.parse(thoiKhoaBieu)?.map((ngayHoc) => {
+        return <Tag color="blue"> {LICH_HOC.find((item) => item.value === ngayHoc)?.label} </Tag>
+      })}
+     </p>
+      </>
+    
+    )
+  }
+
+  const colMentorChuaCoLop = [
+    {
+      title: "Tên mentor",
+      render: (text, record) => {
+        return record.HoTen;
+      },
+      key: "hoTen",
+      dataIndex: "hoTen",
+    },
+    {
+      title: "Email",
+      render: (text, record) => {
+        return record.Email;
+      },
+      key: "email",
+      dataIndex: "email",
+    },
+    {
+      title: "Số điện thoại",
+      render: (text, record) => {
+        return record.SoDT;
+      },
+      key: "soDT",
+      dataIndex: "soDT",
+    },
+    {
+      title: "Thoi gian mentor",
+      render: (text, record) => {
+        // console.log(record)
+        return <Tag color="green"> {OPTIONS_THOI_GIAN_MENTOR.find((item) => item.value === record.ThoiGianMentor)?.label}</Tag>;
+      },
+      key: "thoiGianMentor",
+      dataIndex: "thoiGianMentor",
+    },
+    {
+      title: "Chi nhanh mentor",
+      render: (text, record) => {
+        // console.log(record)
+        // console.log(dsChiNhanh)
+        return record.DanhSachChiNhanhMentor && JSON.parse(record.DanhSachChiNhanhMentor)?.map((item) => {
+          // console.log(item)
+         return <Tag color="red">{dsChiNhanh.find(chiNhanh => chiNhanh.id === item)?.tenChiNhanh}</Tag>
+        });
+      },
+      key: "chiNhanhMentor",
+      dataIndex: "chiNhanhMentor",
+    }
+  ];
+
+  
+
+  const colMentorCoLop = [
     {
       title: "Tên mentor",
       render: (text, record) => {
@@ -830,7 +997,7 @@ export default function DanhGiaMentorV3() {
     {
       title: "Tên lớp",
       render: (text, record) => {
-        return record.TenLopHoc;
+        return taoThongTinTenLopHoc(record.MaLop, LICH_HOC);
       },
       key: "tenLopHoc",
       dataIndex: "tenLopHoc",
@@ -996,7 +1163,7 @@ export default function DanhGiaMentorV3() {
               <Select
                value={thoiGianMentor}
                 style={{ width: 100}}
-                onSelect={(value) => handleSearch(value, "thoi_gian_mentor")}
+                onSelect={(value) => handleSearch(value, "tgm")}
                 options={OPTIONS_THOI_GIAN_MENTOR}
               >
               
@@ -1026,12 +1193,12 @@ export default function DanhGiaMentorV3() {
     allowClear={true}
     placeholder="Chọn chi nhánh cần kiểm tra"
     value={dsChiNhanhKiemTra}
-   onChange={(value) => handleSearch(JSON.stringify(value), "danh_sach_chi_nhanh_kiem_tra")}
+   onChange={(value) => handleSearch(JSON.stringify(value), "dscnkt")}
     options={dsChiNhanh.map((item) =>  {
       // console.log(item)
       return {
-        value: item.id,
-        label: item.tenChiNhanh
+        value: item?.id,
+        label: item?.tenChiNhanh
       }
     })}
   />
@@ -1091,6 +1258,17 @@ export default function DanhGiaMentorV3() {
             />
           </div>
           <div className="col-md-2">
+            <b>Không có lớp:</b>{" "}
+            <Switch
+              checked={isChuaCoLopMentor}
+              onChange={(value) => {
+                
+                handleSearch(value, "mtcl")
+
+              }}
+            />
+          </div>
+          <div className="col-md-2">
             <Input.Group compact>
               <button className="btn btn-primary" onClick={handleFilterData}>
                 Lọc dữ liệu
@@ -1111,7 +1289,7 @@ export default function DanhGiaMentorV3() {
           <Table
             bordered
             dataSource={state.data}
-            columns={columns}
+            columns={isChuaCoLopMentor ? colMentorChuaCoLop : colMentorCoLop}
             pagination={{
               defaultPageSize: 10,
               pageSizeOptions: ["10", "15", "20", "30", "50"],
@@ -1199,14 +1377,14 @@ function ChiTietDanhGiaMentorComponent(props) {
       item.isDanhGia = false
      
       let mangNoiDungDanhGia = []
-      if (item.NoiDungDanhGia){
-        mangNoiDungDanhGia = JSON.parse(item.NoiDungDanhGia);
+      if (item?.NoiDungDanhGia){
+        mangNoiDungDanhGia = JSON.parse(item?.NoiDungDanhGia);
         item.isDanhGia = true
       } 
   
       for(let j = 0; j < lengthDanhMucDanhGia; j++) {
         let tenKey = danhMucDanhGia[j];
-        item[removeVietnameseTones(tenKey.replaceAll(" ",''))] = item.isDanhGia ? mangNoiDungDanhGia[j] : ""
+        item[removeVietnameseTones(tenKey.replaceAll(" ",''))] = item?.isDanhGia ? mangNoiDungDanhGia[j] : ""
       }
   
       mangData.push(item)
@@ -1297,7 +1475,7 @@ function ChiTietDanhGiaMentorComponent(props) {
 
   ];
 
-  const columns = [
+  const colXemDanhGia = [
     {
       title: "Tên người dánh giá",
       render: (text, record) => {
@@ -1411,7 +1589,7 @@ function ChiTietDanhGiaMentorComponent(props) {
     <Table
             bordered
             dataSource={dataTable}
-            columns={columns}
+            columns={colXemDanhGia}
             pagination={{
               defaultPageSize: 10,
               pageSizeOptions: ["10", "15", "20", "30", "50"],

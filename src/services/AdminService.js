@@ -33,6 +33,9 @@ const layDanhSachMentorChuaChamBaiService = () => {
     return BaseApi.get(`/api/quan-ly-mentor/lay-tat-ca-mentor-chua-cham`);
 }
 
+const layDanhSachConfigService = () => {
+    return BaseApi.get(`/api/config`);
+}
 
 
 
@@ -45,5 +48,6 @@ export const AdminService = {
     layDanhSachDanhGiaCrmService,
     layDanhSachMentorChuaChamBaiService,
     layDanhSachDanhGiaCrmTheoThangService,
-    themNhacNhoMentorService
+    themNhacNhoMentorService,
+    layDanhSachConfigService
 }
