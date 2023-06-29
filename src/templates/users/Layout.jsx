@@ -9,6 +9,7 @@ import axios from "axios";
 export default function Layout() {
   const [searchParams, setSearchParams] = useSearchParams();
   const token = searchParams.get("inf");
+  // chuyen che do debug de khong bi da ve google.com
   const IS_NOT_DEBUG = true
   const getQuyenUserVaCheck = async (tokenLocal) => {
     try {

@@ -26,8 +26,14 @@ export default function Header() {
           <li className="nav-item ">
             <NavLink className={({ isActive}) =>
               "nav-link text-white " + (isActive && "bg-info")
-            } to="/danh-gia-mentor">Danh Gia Mentor </NavLink>
+            } to="/danh-gia-mentor">Đánh giá Mentor </NavLink>
 
+          </li>
+
+          <li className="nav-item ">
+            <NavLink className={({ isActive}) =>
+              "nav-link text-white " + (isActive && "bg-info")
+            } to="/quan-ly-danh-sach-mentor">Quản lý danh sách Mentor </NavLink>
           </li>
       
 
