@@ -5,10 +5,11 @@ import { callApiQuyen } from "../../redux/reducers/adminReducer";
 import Header from "./Header";
 import { checkQuyenUser } from "../../utils/SelectOption";
 import axios from "axios";
-
+ 
 export default function Layout() {
   const [searchParams, setSearchParams] = useSearchParams();
   const token = searchParams.get("inf");
+  const IS_NOT_DEBUG = true
   const getQuyenUserVaCheck = async (tokenLocal) => {
     try {
       const res = await axios({
@@ -22,11 +23,11 @@ export default function Layout() {
       const checkQuyen = checkQuyenUser(res.data.content, "XL_MT");
       if (!checkQuyen) {
         // alert("Bạn không có quyền xem lớp học này");
-        window.location = "https://www.google.com/";
+        if (IS_NOT_DEBUG)    window.location = "https://www.google.com/";
       }
     } catch (error) {
       console.log(error);
-      window.location = "https://www.google.com/";
+      if (IS_NOT_DEBUG)  window.location = "https://www.google.com/";
     }
   };
 
@@ -38,7 +39,7 @@ export default function Layout() {
       localStorage.setItem("USER_TOKEN", token);
       getQuyenUserVaCheck(tokenLocal);
     } else if (!tokenLocal && !token) {
-      window.location = "https://www.google.com/";
+      if (IS_NOT_DEBUG)  window.location = "https://www.google.com/";
     } else if (tokenLocal && !token) {
       getQuyenUserVaCheck(tokenLocal);
     } else if (tokenLocal && token) {
