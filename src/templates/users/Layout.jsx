@@ -20,7 +20,7 @@ export default function Layout() {
           Authorization: `Bearer ${tokenLocal}`,
         },
       });
-      console.log(res)
+      // console.log(res)
       const checkQuyen = checkQuyenUser(res.data.content, "XL_MT");
       if (!checkQuyen) {
         // alert("Bạn không có quyền xem lớp học này");

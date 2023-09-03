@@ -77,6 +77,7 @@ export default function DanhGiaMentorV3() {
     dscnkt: "[]",
     mtkcl: 0,
     gbm: 0,
+    tfbvl: 1,
   });
 
   //get range date value
@@ -111,6 +112,7 @@ export default function DanhGiaMentorV3() {
     : [];
   let isChuaCoLopMentor = +searchParams.get("mtkcl");
   let isGroupByMentor = +searchParams.get("gbm");
+  let isTatFilterThoiGianVaLopMentor = +searchParams.get("tfbvl")
 
   const reducer = (state, { type, payload }) => {
     switch (type) {
@@ -211,7 +213,7 @@ export default function DanhGiaMentorV3() {
     return () => {
       isMount = false;
     };
-  }, [isChuaCoLopMentor, isGroupByMentor, thoiGianMentor]);
+  }, [isChuaCoLopMentor, isGroupByMentor, thoiGianMentor, isTatFilterThoiGianVaLopMentor]);
 
   useEffect(() => {
     let isMount = true;
@@ -379,11 +381,15 @@ export default function DanhGiaMentorV3() {
   ) {
     // console.log({thoiGianMentor, dsChiNhanhKiemTra})
 
+  
+    
     let lsMentorCoTheMentor = locCacMentorCoTheMentorTheoChiNhanhVaThoiGian(
       dsMentorChiNhanh,
       thoiGianMentor,
       dsChiNhanhKiemTra
     );
+
+   
 
     // console.log(lsMentorCoTheMentor)
     let data = [];
@@ -515,12 +521,15 @@ export default function DanhGiaMentorV3() {
           dataFiltered
         );
       } else {
-        dataFiltered = locDanhSachMentorDangCoLopCoTheMentor(
-          dsMentorChiNhanh,
-          thoiGianMentor,
-          dsChiNhanhKiemTra,
-          dataFiltered
-        );
+        if (!isTatFilterThoiGianVaLopMentor) {
+          dataFiltered = locDanhSachMentorDangCoLopCoTheMentor(
+            dsMentorChiNhanh,
+            thoiGianMentor,
+            dsChiNhanhKiemTra,
+            dataFiltered
+          );
+        }
+        
       }
 
       // console.log(dataFiltered)
@@ -590,6 +599,7 @@ export default function DanhGiaMentorV3() {
     searchParams.set("mtkcl", 0);
     searchParams.set("tgm", "Tatca");
     searchParams.set("dscnkt", "[]");
+    searchParams.set("tfbvl", 1)
     setSearchParams(searchParams);
     handleFilterData();
   };
@@ -615,6 +625,7 @@ export default function DanhGiaMentorV3() {
 
       case "cb":
       case "gbm":
+        case "tfbvl":
       case "nx": {
         searchParams.set(name, value ? 1 : 0);
         break;
@@ -800,6 +811,28 @@ export default function DanhGiaMentorV3() {
     }
 
     return _.mean(mangData).toFixed(3);
+  }
+
+  function tinhSoLuongDanhGia(record) {
+    const DanhSachDanhGia = JSON.parse(record?.DanhSachDanhGia);
+// console.log(record)
+    let lengthDanhSachDanhGia = DanhSachDanhGia?.length;
+    let soLuongDanhGia = 0
+
+    //hoc vien 40%
+    //mentor giang vien 30%
+
+    for (let i = 0; i < lengthDanhSachDanhGia; i++) {
+      let item = DanhSachDanhGia[i];
+      
+      if (item?.NoiDungDanhGia) {
+        soLuongDanhGia++
+      }
+      
+      }
+
+      
+    return [soLuongDanhGia,lengthDanhSachDanhGia]
   }
 
   function tinhTongDanhGiaMentor(record) {
@@ -1008,7 +1041,7 @@ export default function DanhGiaMentorV3() {
       dataIndex: "soDT",
     },
     {
-      title: "Cac lop dang mentor",
+      title: "Lớp đang mentor",
       render: (text, record) => {
         return record?.DanhSachMaLop && locDanhSachCacLopDangMentor(record?.DanhSachMaLop);
       },
@@ -1074,6 +1107,20 @@ export default function DanhGiaMentorV3() {
       sorter: (a, b) =>
         tinhTongDiemTrungBinhDanhGia(a) - tinhTongDiemTrungBinhDanhGia(b),
     },
+    
+    {
+      title: "Số lượng đánh giá",
+      render: (text, record) => {
+       let soLuongDanhGia = tinhSoLuongDanhGia(record);
+       return `${soLuongDanhGia[0]}/${soLuongDanhGia[1]}`
+      // return soLuongDanhGia
+      },
+      key: "SoLuongDanhGia",
+      dataIndex: "SoLuongDanhGia",
+      sorter: (a, b) =>
+      tinhSoLuongDanhGia(a)[0] - tinhSoLuongDanhGia(b)[0],
+    },
+    
     {
       title: "Số lớp đang mentor ",
       render: (text, record) => {
@@ -1189,6 +1236,20 @@ export default function DanhGiaMentorV3() {
       sorter: (a, b) =>
         tinhTongDiemTrungBinhDanhGia(a) - tinhTongDiemTrungBinhDanhGia(b),
     },
+    
+    {
+      title: "Số lượng đánh giá",
+      render: (text, record) => {
+       let soLuongDanhGia = tinhSoLuongDanhGia(record);
+       return `${soLuongDanhGia[0]}/${soLuongDanhGia[1]}`
+      // return soLuongDanhGia
+      },
+      key: "SoLuongDanhGia",
+      dataIndex: "SoLuongDanhGia",
+      sorter: (a, b) =>
+      tinhSoLuongDanhGia(a)[0] - tinhSoLuongDanhGia(b)[0],
+    },
+
     {
       title: "Số lớp đang mentor ",
       render: (text, record) => {
@@ -1268,7 +1329,7 @@ export default function DanhGiaMentorV3() {
               </Input.Group>
             </div>
 
-            <div className="col-md-3">
+            <div className="col-md-3" >
               <Input.Group compact>
                 <span className="mr-2" style={{ lineHeight: "30px" }}>
                   Thời gian mentor:{" "}
@@ -1278,8 +1339,19 @@ export default function DanhGiaMentorV3() {
                   style={{ width: 100 }}
                   onSelect={(value) => handleSearch(value, "tgm")}
                   options={OPTIONS_THOI_GIAN_MENTOR}
+                  disabled= {isTatFilterThoiGianVaLopMentor}
                 ></Select>
               </Input.Group>
+            </div>
+
+            <div className="col-md-2">
+              <b>Tắt filter buổi và chi nhánh mentor:</b>{" "}
+              <Switch
+                checked={isTatFilterThoiGianVaLopMentor}
+                onChange={(value) => {
+                  handleSearch(value, "tfbvl");
+                }}
+              />
             </div>
           </div>
           <div className="row mt-2">
@@ -1290,6 +1362,7 @@ export default function DanhGiaMentorV3() {
                 Danh sách chi nhánh check:{" "}
               </span>
               <Select
+              disabled={isTatFilterThoiGianVaLopMentor}
                 mode="tags"
                 style={{
                   width: "100%",
@@ -1375,12 +1448,13 @@ export default function DanhGiaMentorV3() {
             dataSource={state.data}
             columns={kiemTraTrangThaiTable(isGroupByMentor, isChuaCoLopMentor)}
             // columns={isChuaCoLopMentor ? colMentorChuaCoLop : colMentorCoLop}
-            pagination={{
-              defaultPageSize: 10,
-              pageSizeOptions: ["10", "15", "20", "30", "50"],
-              showSizeChanger: true,
-            }}
-            className="pr-3"
+            // pagination={{
+            //   defaultPageSize: 10,
+            //   pageSizeOptions: ["10", "15", "20", "30", "50"],
+            //   showSizeChanger: true,
+            // }}
+            pagination={false} 
+            className="pr-3 table-striped"
           ></Table>
           <Modal
             open={state.isModalChiTietDanhGiaVisible}
@@ -1671,12 +1745,13 @@ function ChiTietDanhGiaMentorComponent(props) {
         bordered
         dataSource={dataTable}
         columns={colXemDanhGia}
-        pagination={{
-          defaultPageSize: 10,
-          pageSizeOptions: ["10", "15", "20", "30", "50"],
-          showSizeChanger: true,
-        }}
-        className="pr-3"
+        // pagination={{
+        //   defaultPageSize: 10,
+        //   pageSizeOptions: ["10", "15", "20", "30", "50"],
+        //   showSizeChanger: true,
+        // }}
+        pagination={false} 
+        className="pr-3 table-striped"
       ></Table>
       <Modal
         open={isVisibleModalXemNhacNho}
@@ -1700,12 +1775,13 @@ function ChiTietDanhGiaMentorComponent(props) {
           bordered
           dataSource={danhSachNhacNho}
           columns={columnNhacNho}
-          pagination={{
-            defaultPageSize: 10,
-            pageSizeOptions: ["10", "15", "20", "30", "50"],
-            showSizeChanger: true,
-          }}
-          className="pr-3"
+          // pagination={{
+          //   defaultPageSize: 10,
+          //   pageSizeOptions: ["10", "15", "20", "30", "50"],
+          //   showSizeChanger: true,
+          // }}
+          pagination={false} 
+          className="pr-3 table-striped" 
         ></Table>
         <Modal
           open={isVisibleThemNhacNhoModal}
